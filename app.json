@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ROM-UI",
-    "slug": "ROM-UI",
+    "slug": "rom-ui",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -22,6 +22,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a3efbbc0-93ce-458b-bac9-c6749b83334a"
+      }
+    },
+    "owner": "zarthos"
   }
 }
