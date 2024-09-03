@@ -7,7 +7,7 @@ function MenuItem( {itemName, itemPrice} ) {
             <Pressable style={styles.removeOrAdd} onPress={() => console.log("Minus pressed")}>
                 <Text style={styles.textRemoveOrAdd}>-</Text>
             </Pressable>
-            <View style={{width: "70%"}}>
+            <View style={{width: "71%"}}>
                 <Text style={styles.text}>{itemName}</Text>
                 <Text style={styles.text}>{itemPrice} €</Text>
             </View>
