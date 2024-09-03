@@ -6,28 +6,28 @@ function Menu(props) {
     return (
         <View style={styles.container}>
             <ScrollView>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
-                <MenuItem itemName={"Menu normal"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
             </ScrollView>
         </View>
     );
