@@ -22,9 +22,9 @@ function MenuItem( {itemName, itemPrice} ) {
 
 const styles = StyleSheet.create({
     box: {
-        backgroundColor: "rgba(39, 19, 10, 1)",  
+        backgroundColor: "#420404",  
         borderWidth: 1,
-        borderColor: "red",
+        borderColor: "rgba(39, 19, 10, 1)",
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
