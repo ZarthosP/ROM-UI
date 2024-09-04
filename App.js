@@ -1,13 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { Button, Modal, StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
 import Menu from './screens/Menu';
+import Kitchen from './screens/Kitchen';
 import LanguageModal from './screens/Components/LanguageModal';
 
 export default function App() {
   return (
     <View style={styles.container}>
       <LanguageModal/>
-      <Menu/>
+      <Kitchen/>
     </View>
   );
 }
