@@ -1,14 +1,16 @@
 import React from 'react';
 import { Text, View, StyleSheet, Pressable } from 'react-native';
+import {useTranslation} from 'react-i18next';
 
 function MenuItem( {itemName, itemPrice} ) {
+    const {t} = useTranslation();
     return (
         <View style={styles.box}>
             <Pressable style={styles.removeOrAdd} onPress={() => console.log("Minus pressed")}>
                 <Text style={styles.textRemoveOrAdd}>-</Text>
             </Pressable>
             <View style={{width: "71%"}}>
-                <Text style={styles.text}>{itemName}</Text>
+                <Text style={styles.text}>{t(itemName)}</Text>
                 <Text style={styles.text}>{itemPrice} €</Text>
             </View>
             <Pressable style={styles.removeOrAdd} onPress={() => console.log("Plus pressed")}>
@@ -20,9 +22,9 @@ function MenuItem( {itemName, itemPrice} ) {
 
 const styles = StyleSheet.create({
     box: {
-        backgroundColor: "rgba(39, 19, 10, 1)",  
+        backgroundColor: "#420404",  
         borderWidth: 1,
-        borderColor: "red",
+        borderColor: "rgba(39, 19, 10, 1)",
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
