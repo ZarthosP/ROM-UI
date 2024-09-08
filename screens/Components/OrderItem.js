@@ -1,11 +1,15 @@
 import React from 'react';
-import { Text, View, StyleSheet, Pressable } from 'react-native';
+import { Text, View, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import {useTranslation} from 'react-i18next';
 
 function OrderItem( {itemName, quantity, table} ) {
+
+    const {height, width} = useWindowDimensions();
+
     const {t} = useTranslation();
+    
     return (
-        <Pressable style={[styles.box]} onPress={() => console.log("pressed")}>
+        <Pressable style={[styles.box]} onPress={() => console.log(height)}>
             <Text style={styles.text}>{t(itemName)} x {quantity}</Text>
             <Text style={styles.text}>{t("table")} {table}</Text>
         </Pressable>

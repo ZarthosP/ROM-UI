@@ -3,31 +3,24 @@ import { Text, View, StyleSheet, ScrollView } from 'react-native';
 import MenuItem from './Components/MenuItem';
 
 function Menu(props) {
+
+    const normalMenu = {
+        itemName: "normalMenu",
+        quantity: 2,
+        itemPrice: 26
+    }
+
     return (
         <View style={styles.container}>
             <ScrollView>
-                <MenuItem itemName={"normalMenu"} itemPrice={"26"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
-                <MenuItem itemName={"normalMenu"} itemPrice={"25"}/>
+                <MenuItem {...normalMenu}/>
+                <MenuItem {...normalMenu}/>
+                <MenuItem {...normalMenu}/>
+                <MenuItem {...normalMenu}/>
+                <MenuItem {...normalMenu}/>
+                <MenuItem {...normalMenu}/>
+                <MenuItem {...normalMenu}/>
+                <MenuItem {...normalMenu}/>
             </ScrollView>
         </View>
     );
@@ -39,7 +32,7 @@ const styles = StyleSheet.create({
         gap: 30,
         borderWidth: 6,
         borderColor: "red",
-        backgroundColor: "rgba(39, 19, 10, 1)",  
+        backgroundColor: "white",  
       },
 })
 

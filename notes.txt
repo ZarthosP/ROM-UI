@@ -1,0 +1,2 @@
+Make app landscape compatible (useWindowsDimensions)
+Use FlatList to render lists of objects

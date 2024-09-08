@@ -32,7 +32,6 @@ function LanguageModal(props) {
             />
             </View>
         </Modal>
-        <Text style={{ color: "white"}}>{t('test')}</Text>
         <Button title={t('changeLanguage')} onPress={() => setVisible(true)}/>
         </View>
     );
