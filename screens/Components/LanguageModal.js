@@ -17,6 +17,8 @@ function LanguageModal(props) {
     }
     return (
         <View style={styles.container}>
+            <Text style={ {color: isDarkMode ? "white" : "red"} }>Dark Mode</Text>
+            <Switch value={isDarkMode} onValueChange={() => setIsDarkMode((previousState) => !previousState)}/>
             <Modal visible={visible} onRequestClose={() => setVisible(false)}>
                 <View style={styles.languageList}>
                 <FlatList data={Object.keys(languageResources)} renderItem={({item}) => (
@@ -33,9 +35,7 @@ function LanguageModal(props) {
                 />
                 </View>
             </Modal>
-            <Button title={t('changeLanguage')} onPress={() => setVisible(true)}/>
-            <Text style={ {color: isDarkMode ? "white" : "red"} }>Dark Mode</Text>
-            <Switch value={isDarkMode} onValueChange={() => setIsDarkMode((previousState) => !previousState)}/>
+            <Button color="purple" title={t('changeLanguage')} onPress={() => setVisible(true)}/>
         </View>
     );
 }

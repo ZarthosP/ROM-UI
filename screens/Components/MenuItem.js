@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Text, View, StyleSheet, Pressable } from 'react-native';
 import {useTranslation} from 'react-i18next';
 
-function MenuItem( {itemName, quantity, itemPrice} ) {
+function MenuItem( {title, quantity, price} ) {
     const [quantityLocal, setQuantity] = useState(quantity);
     const {t} = useTranslation();
     return (
@@ -15,8 +15,8 @@ function MenuItem( {itemName, quantity, itemPrice} ) {
                 <Text style={styles.textRemoveOrAdd}>-</Text>
             </Pressable>
             <View style={{width: "71%"}}>
-                <Text style={styles.text}>{t(itemName)}</Text>
-                <Text style={styles.text}>{itemPrice} €</Text>
+                <Text style={styles.text}>{t(title)}</Text>
+                <Text style={styles.text}>{price} €</Text>
                 <Text style={styles.text}>x {quantityLocal}</Text>
             </View>
             <Pressable style={styles.removeOrAdd} onPress={() => {
