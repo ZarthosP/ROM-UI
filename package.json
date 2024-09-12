@@ -30,6 +30,7 @@
     "sockjs": "^0.3.24",
     "sockjs-client": "^1.6.1",
     "text-encoding": "^0.7.0",
+    "text-encoding-polyfill": "^0.6.7",
     "ws": "^8.18.0"
   },
   "devDependencies": {

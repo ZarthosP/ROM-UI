@@ -1,22 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Platform } from 'react-native';
 import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client'; // Import SockJS client
+import SockJS from 'sockjs-client';
+import 'text-encoding-polyfill'; // Polyfill for TextEncoder and TextDecoder
 
-const WEBSOCKET_URL = 'http://10.0.2.2:8080/ws'; // Ensure this matches your backend endpoint
 
 const WebSocketComponent = () => {
+
+  const WEBSOCKET_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8080/ws' : 'http://localhost:8080/ws';
   const [message, setMessage] = useState('');
   const [inputMessage, setInputMessage] = useState('');
   const [client, setClient] = useState(null);
-  const [isConnected, setIsConnected] = useState(false); // Track connection status
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     // Initialize the STOMP client
     const stompClient = new Client({
-      webSocketFactory: () => new SockJS(WEBSOCKET_URL), // Use SockJS factory
-      debug: (str) => console.log(str), // Optional: Log debug information
-      reconnectDelay: 5000, // Attempt to reconnect every 5 seconds if the connection is lost
+      webSocketFactory: () => new SockJS(WEBSOCKET_URL),
+      debug: (str) => console.log(str),
+      reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
@@ -24,12 +26,15 @@ const WebSocketComponent = () => {
     // Handle successful connection
     stompClient.onConnect = () => {
       console.log('Connected to WebSocket');
-      setIsConnected(true); // Update connection status
+      setIsConnected(true);
 
-      // Subscribe to the topic
-      stompClient.subscribe('/topic/greeting', (message) => {
-        setMessage(message.body); // Set the received message
+      // Subscribe to the topic to receive messages
+      stompClient.subscribe('/topic/cart', (message) => {
+        setMessage(message.body);
       });
+
+      // Send an initial message to request data as soon as the connection is established
+      stompClient.publish({ destination: '/app/cartWS/completeCart', body: 1 });
     };
 
     // Handle errors during connection or session
@@ -49,12 +54,11 @@ const WebSocketComponent = () => {
     };
   }, []);
 
-  // Function to send a message
+  // Function to send a message manually from the input
   const sendMessage = () => {
     if (client && isConnected && inputMessage.trim()) {
-      // Check that the client is connected before sending
-      client.publish({ destination: '/app/hello', body: inputMessage });
-      setInputMessage(''); // Clear the input field
+      client.publish({ destination: '/app/cartWS/completeCart', body: inputMessage });
+      setInputMessage('');
     } else {
       Alert.alert('Connection Error', 'WebSocket is not connected. Please wait and try again.');
     }
