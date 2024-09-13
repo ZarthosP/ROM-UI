@@ -1,48 +1,139 @@
-import React from 'react';
-import { Text, View, StyleSheet, ScrollView } from 'react-native';
-import OrderItem from './Components/OrderItem';
+import React, { useEffect, useState } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  Button,
+  FlatList,
+} from "react-native";
+import OrderItem from "./Components/OrderItem";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client"; // Import SockJS client
+import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
 
 function Kitchen(props) {
-    return (
-        <View style={styles.container}>
-            <OrderItem itemName={"normalMenu"} quantity={1} table={"01"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"02"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"03"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-            <OrderItem itemName={"normalMenu"} quantity={5} table={"26"}/>
-        </View>
-    );
+  const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
+  const [client, setClient] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  const [cart, setCart] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Initialize the STOMP client
+    const stompClient = new Client({
+      webSocketFactory: () => new SockJS(WEBSOCKET_URL),
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    // Handle successful connection
+    stompClient.onConnect = () => {
+      console.log("Connected to WebSocket");
+      setIsConnected(true);
+
+      // Subscribe to the topic to receive messages
+      stompClient.subscribe("/topic/kitchen", (response) => {
+        const parsedResponse = JSON.parse(response.body);
+        // console.log(parsedResponse);
+        setCart(parsedResponse);
+        setIsLoading(false);
+        setError("");
+      });
+
+      // Send an initial message to request data as soon as the connection is established
+      stompClient.publish({
+        destination: "/app/cartWS/kitchenOrders",
+      });
+    };
+
+    // Handle errors during connection or session
+    stompClient.onStompError = (frame) => {
+      console.error("Broker reported error: ", frame.headers["message"]);
+      console.error("Additional details: ", frame.body);
+      Alert.alert(
+        "WebSocket Error",
+        "Failed to connect or maintain the WebSocket connection."
+      );
+    };
+
+    // Activate the client to start the connection process
+    stompClient.activate();
+    setClient(stompClient);
+
+    // Clean up the client when the component is unmounted
+    return () => {
+      stompClient.deactivate();
+    };
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <Button title="Log cart" onPress={() => console.log(cart)}></Button>
+      {/* <OrderItem itemName={"normalMenu"} quantity={1} table={"01"} /> */}
+      <FlatList
+        data={cart}
+        renderItem={({ item }) => {
+          if (item.cart.cartItems.length != 0) {
+            return (
+              <View>
+                <Text>Table {item.number}</Text>
+                <View style={styles.itemListContainer}>
+                  <FlatList
+                    horizontal={true}
+                    data={item.cart.cartItems}
+                    renderItem={({ item: cartItem }) => {
+                      if (cartItem.confirmed != 0) {
+                        return (
+                          <OrderItem
+                            itemName={cartItem.menuItem.title}
+                            quantity={cartItem.confirmed}
+                            table={item.number}
+                            id={cartItem.id}
+                          />
+                        );
+                      }
+                    }}
+                  />
+                </View>
+                {/* <OrderItem itemName={"normalMenu"} quantity={1} table={"01"} /> */}
+              </View>
+            );
+          }
+        }}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flexWrap: "wrap",
-        flex: 1,
-        flexDirection: "row",
-        alignItems: 'flex-start',
-        borderWidth: 6,
-        borderColor: "red",
-        gap: 10,
-        backgroundColor: "rgba(39, 19, 10, 1)",  
-      },
-})
+  container: {
+    flex: 1,
+    gap: 30,
+    backgroundColor: "white",
+  },
+  itemListContainer: {
+    flex: 1,
+    flexDirection: "row",
+    gap: 30,
+    backgroundColor: "white",
+    borderColor: "red",
+    borderWidth: 7,
+  },
+  //   container: {
+  //     flexWrap: "wrap",
+  //     flex: 1,
+  //     flexDirection: "row",
+  //     alignItems: "flex-start",
+  //     borderWidth: 6,
+  //     borderColor: "red",
+  //     gap: 10,
+  //     backgroundColor: "white",
+  //   },
+});
 
 export default Kitchen;

@@ -37,7 +37,7 @@ function Menu(props) {
 
     // Handle successful connection
     stompClient.onConnect = () => {
-      // console.log("Connected to WebSocket");
+      console.log("Connected to WebSocket");
       setIsConnected(true);
 
       // Subscribe to the topic to receive messages
