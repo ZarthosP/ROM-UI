@@ -39,9 +39,10 @@ function OrderItem({ itemName, quantity, table, id }) {
 
 const styles = StyleSheet.create({
   box: {
-    backgroundColor: "plum",
-    borderWidth: 7,
-    borderColor: "green",
+    backgroundColor: "white",
+    borderColor: "black",
+    borderWidth: 1,
+    margin: 10,
     padding: 10,
     borderRadius: 10,
     minWidth: 200,
@@ -50,7 +51,7 @@ const styles = StyleSheet.create({
   text: {
     fontWeight: "bold",
     textAlign: "center",
-    color: "white",
+    color: "black",
   },
 });
 

@@ -12,6 +12,7 @@ import {
   Alert,
 } from "react-native";
 import Menu from "./screens/Menu";
+import Bar from "./screens/Bar";
 import Basket from "./screens/Basket";
 import MenuNoWebSocket from "./screens/MenuNoWebSocket";
 import Kitchen from "./screens/Kitchen";
@@ -32,7 +33,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Kitchen"
+        initialRouteName="Basket"
         screenOptions={{
           tabBarActiveTintColor: "purple",
         }}
@@ -60,7 +61,7 @@ export default function App() {
         />
         <Tab.Screen
           name="Bar"
-          component={Kitchen}
+          component={Bar}
           options={{
             tabBarIcon: ({ color }) => (
               <Ionicons name="beer" size={20} color={color} />

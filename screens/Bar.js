@@ -39,7 +39,7 @@ function Kitchen(props) {
       // Subscribe to the topic to receive messages
       stompClient.subscribe("/topic/kitchen", (response) => {
         const parsedResponse = JSON.parse(response.body);
-        // console.log(parsedResponse);
+        console.log(parsedResponse);
         setCart(parsedResponse);
         setIsLoading(false);
         setError("");
@@ -78,7 +78,7 @@ function Kitchen(props) {
         renderItem={({ item }) => {
           if (
             item.cart.cartItems.filter(
-              (i) => i.menuItem.menuItemType === "MEAL"
+              (i) => i.menuItem.menuItemType === "DRINK"
             ).length != 0
           ) {
             return (
@@ -91,7 +91,7 @@ function Kitchen(props) {
                     renderItem={({ item: cartItem }) => {
                       if (
                         cartItem.confirmed != 0 &&
-                        cartItem.menuItem.menuItemType === "MEAL"
+                        cartItem.menuItem.menuItemType === "DRINK"
                       ) {
                         return (
                           <OrderItem

@@ -11,7 +11,8 @@ import {
   Alert,
   Pressable,
 } from "react-native";
-import MenuItem from "./Components/MenuItem";
+import BasketItem from "./Components/BasketItem";
+import QuantitySelector from "./Components/QuantitySelector";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client"; // Import SockJS client
 import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
@@ -22,9 +23,12 @@ function Menu(props) {
   const [isConnected, setIsConnected] = useState(false);
 
   const [cart, setCart] = useState([]);
+  const [localCart, setLocalCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+
+  const [numberTest, setNumberTest] = useState(0);
 
   useEffect(() => {
     // Initialize the STOMP client
@@ -44,6 +48,8 @@ function Menu(props) {
       stompClient.subscribe("/topic/cart", (response) => {
         const parsedResponse = JSON.parse(response.body);
         setCart(parsedResponse);
+        initalizeLocalCart(parsedResponse);
+        console.log(parsedResponse);
         setIsLoading(false);
         setError("");
       });
@@ -98,7 +104,7 @@ function Menu(props) {
         destination: "/app/cartWS/completeCart",
         body: JSON.stringify({
           id: cart.id,
-          completeCartDto: validatePreSelectedCartItems(),
+          completeCartDto: finalCart(),
         }),
       });
     } else {
@@ -109,30 +115,69 @@ function Menu(props) {
     }
   };
 
-  const updatePreSelected = (itemId, newPreSelectedValue) => {
-    const updatedCart = cart.cartItems.map((item) => {
-      if (item.id === itemId) {
-        const newQuantity =
-          item.quantity + newPreSelectedValue - item.preSelected;
+  const finalCart = () => {
+    const updatedCartItems = cart.cartItems.map((item) => {
+      const matchingLocalItem = localCart.cartItems.find(
+        (localItem) => localItem.id === item.id
+      );
+
+      if (matchingLocalItem) {
         return {
           ...item,
-          preSelected: newPreSelectedValue,
-          quantity: newQuantity,
+          payed: item.payed + matchingLocalItem.payed,
+          ready: matchingLocalItem.ready,
+        };
+      }
+
+      return item;
+    });
+
+    return { ...cart, cartItems: updatedCartItems };
+  };
+
+  const initalizeLocalCart = (cart) => {
+    const initLocalCart = cart.cartItems.map((item) => {
+      return {
+        ...item,
+        payed: 0,
+      };
+    });
+    setLocalCart({ ...localCart, cartItems: initLocalCart });
+    return { ...localCart, cartItems: initLocalCart };
+  };
+
+  const updatePayed = (itemId, qtyPayed) => {
+    const updatedCart = localCart.cartItems.map((item) => {
+      const matchingCartItem = cart.cartItems.find(
+        (cartItem) => cartItem.id === item.id
+      );
+
+      if (item.id === itemId) {
+        return {
+          ...item,
+          payed: qtyPayed,
+          ready: matchingCartItem.ready - qtyPayed,
         };
       }
       return item;
     });
-    setCart({ ...cart, cartItems: updatedCart });
-    return { ...cart, cartItems: updatedCart };
+    setLocalCart({ ...localCart, cartItems: updatedCart });
+    return { ...localCart, cartItems: updatedCart };
   };
 
-  const validatePreSelectedCartItems = () => {
-    const updatedCart = cart.cartItems.map((item) => {
-      const newConfirmed = item.confirmed + item.preSelected;
-      return { ...item, confirmed: newConfirmed, preSelected: 0 };
-    });
-    setCart({ ...cart, cartItems: updatedCart });
-    return { ...cart, cartItems: updatedCart };
+  const handleNumberSelectedChange = (id, newNumber) => {
+    updatePayed(id, newNumber);
+  };
+
+  const getReadyItemsFromCart = (id) => {
+    const matchingCartItem = cart.cartItems.find(
+      (cartItem) => cartItem.id === id
+    );
+
+    if (matchingCartItem) {
+      return matchingCartItem.ready;
+    }
+    return 77;
   };
 
   if (isLoading) {
@@ -147,44 +192,62 @@ function Menu(props) {
   return (
     <View style={styles.container}>
       <Button title="Log cart" onPress={() => console.log(cart)}></Button>
+      <Button
+        title="Log localCart"
+        onPress={() => console.log(localCart)}
+      ></Button>
+      <Button
+        title="Log quantity"
+        onPress={() => console.log(numberTest)}
+      ></Button>
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : (
         <>
+          <Text>To pay</Text>
           <FlatList
-            data={cart.cartItems}
+            data={localCart.cartItems.filter((i) => i.ready > 0 || i.payed > 0)}
             renderItem={({ item }) => {
               return (
-                <View style={styles.box}>
-                  <Pressable
-                    style={styles.removeOrAdd}
-                    onPress={() =>
-                      changeItemQuantity(item.id, item.preSelected - 1)
-                    }
-                  >
-                    <Text style={styles.textRemoveOrAdd}>-</Text>
-                  </Pressable>
-                  <MenuItem
+                <View style={styles.itemContainer}>
+                  <BasketItem
                     title={item.menuItem.title}
                     price={item.menuItem.price}
                     quantity={item.quantity}
                     confirmed={item.confirmed}
                     preSelected={item.preSelected}
+                    ready={getReadyItemsFromCart(item.id)}
+                    payed={item.payed}
                   />
-                  <Pressable
-                    style={styles.removeOrAdd}
-                    onPress={() =>
-                      changeItemQuantity(item.id, item.preSelected + 1)
-                    }
-                  >
-                    <Text style={styles.textRemoveOrAdd}>+</Text>
-                  </Pressable>
+                  <QuantitySelector
+                    ready={item.ready}
+                    payed={item.payed}
+                    change={handleNumberSelectedChange}
+                    id={item.id}
+                    price={item.menuItem.price}
+                  />
                 </View>
               );
             }}
             ListEmptyComponent={<Text>No items found</Text>}
+            refreshing={refreshing}
+            // onRefresh={handleRefresh}
+          />
+          <Text>Items selected</Text>
+          <FlatList
+            data={localCart.cartItems.filter((i) => i.payed > 0)}
+            renderItem={({ item }) => {
+              return (
+                <View style={styles.itemContainer}>
+                  <Text>
+                    - {item.payed} x {item.menuItem.title}
+                  </Text>
+                </View>
+              );
+            }}
+            ListEmptyComponent={<Text>No items selected</Text>}
             refreshing={refreshing}
             // onRefresh={handleRefresh}
           />
@@ -199,25 +262,18 @@ function Menu(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 30,
+    gap: 2,
     backgroundColor: "white",
   },
-  box: {
+  itemContainer: {
     backgroundColor: "white",
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    margin: 16,
-    borderColor: "rgba(39, 19, 10, 1)",
+    padding: 1,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     alignContent: "center",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
+    borderColor: "black",
+    borderWidth: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -237,23 +293,6 @@ const styles = StyleSheet.create({
     color: "#D8000C",
     fontSize: 16,
     textAlign: "center",
-  },
-  removeOrAdd: {
-    flex: 1,
-    borderRadius: 16,
-    borderWidth: 1,
-    backgroundColor: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    aspectRatio: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  textRemoveOrAdd: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "black",
   },
 });
 
