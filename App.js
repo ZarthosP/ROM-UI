@@ -14,6 +14,7 @@ import {
 import Menu from "./screens/Menu";
 import Bar from "./screens/Bar";
 import Basket from "./screens/Basket";
+import Login from "./screens/LoginForm";
 import MenuNoWebSocket from "./screens/MenuNoWebSocket";
 import Kitchen from "./screens/Kitchen";
 import LanguageModal from "./screens/Components/LanguageModal";
@@ -33,7 +34,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Basket"
+        initialRouteName="Login"
         screenOptions={{
           tabBarActiveTintColor: "purple",
         }}
@@ -76,6 +77,18 @@ export default function App() {
             tabBarLabel: t("basket"),
             tabBarIcon: ({ color }) => (
               <Ionicons name="bag" size={20} color={color} />
+            ),
+            headerRight: () => <LanguageModal />,
+            tabBarBadge: 3,
+          }}
+        />
+        <Tab.Screen
+          name="Login"
+          component={Login}
+          options={{
+            tabBarLabel: t("Login"),
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="person" size={20} color={color} />
             ),
             headerRight: () => <LanguageModal />,
             tabBarBadge: 3,

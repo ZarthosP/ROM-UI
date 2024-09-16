@@ -16,6 +16,7 @@ import QuantitySelector from "./Components/QuantitySelector";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client"; // Import SockJS client
 import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function Menu(props) {
   const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
@@ -189,9 +190,20 @@ function Menu(props) {
     );
   }
 
+  const getData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("logged-user");
+      console.log(jsonValue != null ? JSON.parse(jsonValue) : null);
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch (e) {
+      // error reading value
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Button title="Log cart" onPress={() => console.log(cart)}></Button>
+      <Button title="Log user" onPress={() => getData()}></Button>
       <Button
         title="Log localCart"
         onPress={() => console.log(localCart)}
