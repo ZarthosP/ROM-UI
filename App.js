@@ -93,7 +93,7 @@ export default function App() {
           <Tab.Screen
             name="Menu"
             component={Menu}
-            initialParams={{ tableId: 1 }}
+            initialParams={{ tableId: 3 }}
             options={{
               tabBarIcon: ({ color }) => (
                 <Ionicons name="book" size={20} color={color} />

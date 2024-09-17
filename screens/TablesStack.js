@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Button,
   Pressable,
+  TouchableOpacity,
 } from "react-native";
 import Menu from "./Menu";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -107,11 +108,12 @@ function TablesListScreen({ navigation }) {
                 <Text>Table {item.number}</Text>
               </Pressable>
 
-              {/* Button to the right */}
-              <Button
-                title="Close"
-                onPress={() => closeTable(item.id)} // Call closeTable function with the table ID
-              />
+              <TouchableOpacity
+                style={styles.roundButton}
+                onPress={() => closeTable(item.id)}
+              >
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
             </View>
           )}
           keyExtractor={(item) => item.id.toString()}
@@ -152,9 +154,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderColor: "black",
     borderWidth: 1,
-    flexDirection: "row", // Align items in a row (text + button)
-    justifyContent: "space-between", // Space out text and button
-    alignItems: "center", // Center vertically
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderRadius: 16,
   },
   tableInfo: {
     flex: 1, // Let the text take up as much space as it can
@@ -176,6 +179,17 @@ const styles = StyleSheet.create({
     color: "#D8000C",
     fontSize: 16,
     textAlign: "center",
+  },
+  roundButton: {
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 8,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
