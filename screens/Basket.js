@@ -11,6 +11,7 @@ import {
   Alert,
   Pressable,
   Modal,
+  TouchableOpacity,
 } from "react-native";
 import BasketItem from "./Components/BasketItem";
 import QuantitySelector from "./Components/QuantitySelector";
@@ -258,37 +259,46 @@ function Menu(props) {
             visible={isModalVisible}
             onRequestClose={() => setIsModalVisible(false)}
             animationType="slide"
-            presentationStyle="formSheet"
+            transparent={true} // Make background transparent for the overlay effect
           >
-            <View style={styles.background2}>
-              <Text>Items selected</Text>
-              <FlatList
-                data={localCart.cartItems.filter((i) => i.payed > 0)}
-                renderItem={({ item }) => {
-                  return (
-                    <View style={styles.itemContainer}>
-                      <Text>
-                        - {item.payed} x {item.menuItem.title}
-                      </Text>
-                    </View>
-                  );
-                }}
-                ListEmptyComponent={<Text>No items selected</Text>}
-                refreshing={refreshing}
-                // onRefresh={handleRefresh}
-              />
-              <Button
-                title="Validate payment"
-                onPress={() => {
-                  validateCart();
-                  setIsModalVisible(false);
-                }}
-              />
-              <Button
-                title="Cancel payment"
-                onPress={() => setIsModalVisible(false)}
-                color="red"
-              />
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Items Selected</Text>
+                <FlatList
+                  data={localCart.cartItems.filter((i) => i.payed > 0)}
+                  renderItem={({ item }) => {
+                    return (
+                      <View style={styles.itemContainer}>
+                        <Text style={styles.itemText}>
+                          - {item.payed} x {item.menuItem.title}
+                        </Text>
+                      </View>
+                    );
+                  }}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>No items selected</Text>
+                  }
+                  refreshing={refreshing}
+                />
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.validateButton]}
+                    onPress={() => {
+                      validateCart();
+                      setIsModalVisible(false);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>Validate Payment</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => setIsModalVisible(false)}
+                  >
+                    <Text style={styles.buttonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </Modal>
         </>
@@ -331,6 +341,60 @@ const styles = StyleSheet.create({
     color: "#D8000C",
     fontSize: 16,
     textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+  },
+  modalContainer: {
+    width: "90%", // Take up most of the screen width
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  itemText: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 10,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+    marginTop: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 20,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 5,
+  },
+  validateButton: {
+    backgroundColor: "#4CAF50", // Green for "Validate"
+  },
+  cancelButton: {
+    backgroundColor: "#FF6347", // Red for "Cancel"
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

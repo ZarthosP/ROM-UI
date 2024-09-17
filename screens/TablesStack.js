@@ -8,6 +8,8 @@ import {
   Button,
   Pressable,
   TouchableOpacity,
+  Modal,
+  TextInput,
 } from "react-native";
 import Menu from "./Menu";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -19,6 +21,9 @@ function TablesListScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [tableList, setTableList] = useState([]);
   const [error, setError] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newTableNumber, setnewTableNumber] = useState();
+  const [newTableNumberOfClients, setnewTableNumberOfClients] = useState();
 
   const fetchTables = async () => {
     try {
@@ -43,7 +48,7 @@ function TablesListScreen({ navigation }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          number: 1,
+          number: newTableNumber,
           numberOfClients: 10,
           tableStatus: "OPEN",
         }),
@@ -112,7 +117,16 @@ function TablesListScreen({ navigation }) {
                 style={styles.roundButton}
                 onPress={() => closeTable(item.id)}
               >
-                <Text style={styles.buttonText}>Close</Text>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {
+                      color: "black",
+                    },
+                  ]}
+                >
+                  Close
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -120,7 +134,56 @@ function TablesListScreen({ navigation }) {
           ListEmptyComponent={<Text>No tables found</Text>}
         />
       )}
-      <Button title="Add new table" onPress={() => addTable()} />
+      <Button title="Add new table" onPress={() => setIsModalVisible(true)} />
+      <Modal
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>New Table</Text>
+
+            <Text style={styles.label}>Table Number</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter table number"
+              value={newTableNumber}
+              onChangeText={setnewTableNumber}
+              keyboardType="numeric"
+            />
+
+            <Text style={styles.label}>Number of Clients</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter number of clients"
+              value={newTableNumberOfClients}
+              onChangeText={setnewTableNumberOfClients}
+              keyboardType="numeric"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.addButton]}
+                onPress={() => {
+                  addTable();
+                  setIsModalVisible(false);
+                }}
+              >
+                <Text style={styles.buttonText}>Add Table</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setIsModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -160,7 +223,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   tableInfo: {
-    flex: 1, // Let the text take up as much space as it can
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -188,6 +251,66 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   buttonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+  },
+  modalContainer: {
+    width: "90%", // Take up most of the screen width
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  input: {
+    width: "100%",
+    height: 40,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    marginBottom: 15,
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "#f9f9f9",
+  },
+  label: {
+    width: "100%",
+    fontSize: 16,
+    marginBottom: 5,
+    fontWeight: "bold",
+    textAlign: "left",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 5,
+  },
+  addButton: {
+    backgroundColor: "#4CAF50", // Green for "Add"
+  },
+  cancelButton: {
+    backgroundColor: "#FF6347", // Red for "Cancel"
+  },
+  buttonText: {
+    color: "black",
     fontSize: 16,
     fontWeight: "bold",
   },
