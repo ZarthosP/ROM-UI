@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 
-function MenuItem({
+function BasketItem({
   title,
   quantity,
   price,
@@ -31,4 +31,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MenuItem;
+export default BasketItem;

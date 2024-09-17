@@ -16,10 +16,11 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client"; // Import SockJS client
 import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
 
-function Menu(props) {
+function Menu({ route }) {
   const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [tableId, setTableId] = useState(route.params.tableId);
 
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +52,7 @@ function Menu(props) {
       // Send an initial message to request data as soon as the connection is established
       stompClient.publish({
         destination: "/app/cartWS/completeCart",
-        body: JSON.stringify({ id: 1, completeCartDto: null }),
+        body: JSON.stringify({ id: tableId, completeCartDto: null }),
       });
     };
 

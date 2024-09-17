@@ -15,6 +15,8 @@ import Menu from "./screens/Menu";
 import Bar from "./screens/Bar";
 import Basket from "./screens/Basket";
 import Login from "./screens/LoginForm";
+import TablesList from "./screens/TablesList";
+import TablesStack from "./screens/TablesStack";
 import MenuNoWebSocket from "./screens/MenuNoWebSocket";
 import Kitchen from "./screens/Kitchen";
 import LanguageModal from "./screens/Components/LanguageModal";
@@ -25,51 +27,113 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
   const { t } = useTranslation();
+  const [loggedUser, setLoggedUser] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  const getLoggedUserData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("logged-user");
+      setLoggedUser(jsonValue != null ? JSON.parse(jsonValue) : null);
+    } catch (e) {
+      console.error("Error reading user data", e);
+    } finally {
+      setIsLoading(false); // Stop loading once data is fetched
+    }
+  };
+
+  useEffect(() => {
+    getLoggedUserData();
+  }, []);
+
+  if (isLoading) {
+    // Display a loading screen while data is being fetched
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Login"
+        initialRouteName="Tables"
         screenOptions={{
           tabBarActiveTintColor: "purple",
         }}
       >
-        <Tab.Screen
-          name="Menu"
-          component={Menu}
-          options={{
-            tabBarIcon: ({ color }) => (
-              <Ionicons name="book" size={20} color={color} />
-            ),
-            headerRight: () => <LanguageModal />,
-          }}
-        />
-        <Tab.Screen
-          name="Kitchen"
-          component={Kitchen}
-          options={{
-            tabBarLabel: t("kitchen"),
-            tabBarIcon: ({ color }) => (
-              <Ionicons name="bonfire" size={20} color={color} />
-            ),
-            headerRight: () => <LanguageModal />,
-          }}
-        />
-        <Tab.Screen
-          name="Bar"
-          component={Bar}
-          options={{
-            tabBarIcon: ({ color }) => (
-              <Ionicons name="beer" size={20} color={color} />
-            ),
-            headerRight: () => <LanguageModal />,
-          }}
-        />
+        {loggedUser &&
+        (loggedUser.userType === "SERVER" ||
+          loggedUser.userType === "ADMIN") ? (
+          <Tab.Screen
+            name="Tables"
+            component={TablesStack}
+            options={{
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="list" size={20} color={color} />
+              ),
+              headerRight: () => <LanguageModal />,
+            }}
+          />
+        ) : (
+          <></>
+        )}
+        {loggedUser &&
+        loggedUser.userType !== "KITCHEN" &&
+        loggedUser.userType !== "BAR" ? (
+          <Tab.Screen
+            name="Menu"
+            component={Menu}
+            initialParams={{ tableId: 1 }}
+            options={{
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="book" size={20} color={color} />
+              ),
+              headerRight: () => <LanguageModal />,
+            }}
+          />
+        ) : (
+          <></>
+        )}
+        {loggedUser &&
+        (loggedUser.userType === "KITCHEN" ||
+          loggedUser.userType === "ADMIN") ? (
+          <Tab.Screen
+            name="Kitchen"
+            component={Kitchen}
+            options={{
+              tabBarLabel: t("kitchen"),
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="bonfire" size={20} color={color} />
+              ),
+              headerRight: () => <LanguageModal />,
+            }}
+          />
+        ) : (
+          <></>
+        )}
+        {loggedUser &&
+        (loggedUser.userType === "BAR" || loggedUser.userType === "ADMIN") ? (
+          <Tab.Screen
+            name="Bar"
+            component={Bar}
+            options={{
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="beer" size={20} color={color} />
+              ),
+              headerRight: () => <LanguageModal />,
+            }}
+          />
+        ) : (
+          <></>
+        )}
         <Tab.Screen
           name="Basket"
           component={Basket}
