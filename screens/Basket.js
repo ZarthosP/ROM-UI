@@ -362,9 +362,7 @@ const styles = StyleSheet.create({
     flex: 2,
     marginRight: 10,
   },
-  quantitySelectorContainer: {
-    flex: 1,
-  },
+  quantitySelectorContainer: {},
   titleText: {
     fontSize: 24,
     fontWeight: "bold",

@@ -40,10 +40,12 @@ function QuantitySelector({
         <View
           style={[
             styles.numberContainer,
-            { borderColor: error ? "red" : "black" },
+            { borderColor: error ? "red" : "#ddd" },
           ]}
         >
-          <Text style={{ color: error ? "red" : "black" }}>{payed}</Text>
+          <Text style={[styles.numberText, { color: error ? "red" : "#333" }]}>
+            {payed}
+          </Text>
         </View>
         <Pressable
           style={styles.incrementPressable}
@@ -92,8 +94,8 @@ const styles = StyleSheet.create({
     alignContent: "center",
   },
   decrementPressable: {
-    borderColor: "black",
-    backgroundColor: "grey",
+    borderColor: "#ddd",
+    backgroundColor: "#e0e0e0",
     borderWidth: 1,
     padding: 12,
     paddingLeft: 20,
@@ -102,8 +104,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 16,
   },
   incrementPressable: {
-    borderColor: "black",
-    backgroundColor: "grey",
+    borderColor: "#ddd",
+    backgroundColor: "#e0e0e0",
     borderWidth: 1,
     padding: 12,
     paddingLeft: 20,
@@ -112,9 +114,13 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 16,
   },
   numberContainer: {
-    borderColor: "black",
+    borderColor: "#ddd",
     borderWidth: 1,
     padding: 12,
+  },
+  numberText: {
+    fontWeight: "bold",
+    color: "#333",
   },
 });
 
