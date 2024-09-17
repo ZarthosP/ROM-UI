@@ -15,6 +15,7 @@ import Menu from "./screens/Menu";
 import Bar from "./screens/Bar";
 import Basket from "./screens/Basket";
 import Login from "./screens/LoginForm";
+import Logout from "./screens/Logout";
 import TablesList from "./screens/TablesList";
 import TablesStack from "./screens/TablesStack";
 import MenuNoWebSocket from "./screens/MenuNoWebSocket";
@@ -64,7 +65,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Tables"
+        initialRouteName="Basket"
         screenOptions={{
           tabBarActiveTintColor: "purple",
         }}
@@ -85,9 +86,10 @@ export default function App() {
         ) : (
           <></>
         )}
-        {loggedUser &&
-        loggedUser.userType !== "KITCHEN" &&
-        loggedUser.userType !== "BAR" ? (
+        {!loggedUser ||
+        (loggedUser &&
+          loggedUser.userType !== "KITCHEN" &&
+          loggedUser.userType !== "BAR") ? (
           <Tab.Screen
             name="Menu"
             component={Menu}
@@ -146,18 +148,41 @@ export default function App() {
             tabBarBadge: 3,
           }}
         />
-        <Tab.Screen
-          name="Login"
-          component={Login}
-          options={{
-            tabBarLabel: t("Login"),
-            tabBarIcon: ({ color }) => (
-              <Ionicons name="person" size={20} color={color} />
-            ),
-            headerRight: () => <LanguageModal />,
-            tabBarBadge: 3,
-          }}
-        />
+        {!loggedUser ? (
+          <Tab.Screen
+            name="Login"
+            component={Login}
+            options={{
+              tabBarLabel: t("Login"),
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="person" size={20} color={color} />
+              ),
+              headerRight: () => <LanguageModal />,
+              tabBarBadge: 3,
+            }}
+          />
+        ) : (
+          <></>
+        )}
+        {loggedUser ? (
+          <Tab.Screen
+            name="Logout"
+            component={Logout}
+            options={{
+              tabBarLabel:
+                loggedUser && loggedUser.username
+                  ? loggedUser.username
+                  : t("Logout"),
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="person" size={20} color={color} />
+              ),
+              headerRight: () => <LanguageModal />,
+              tabBarBadge: 3,
+            }}
+          />
+        ) : (
+          <></>
+        )}
       </Tab.Navigator>
     </NavigationContainer>
   );

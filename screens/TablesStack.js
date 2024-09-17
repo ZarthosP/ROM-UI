@@ -34,6 +34,44 @@ function TablesListScreen({ navigation }) {
     }
   };
 
+  const addTable = async () => {
+    try {
+      const response = await fetch("http://192.168.1.43:8080/table/addTable", {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          number: 1,
+          numberOfClients: 10,
+          tableStatus: "OPEN",
+        }),
+      });
+      const data = await response.json();
+      setTableList(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to load tables");
+      setIsLoading(false);
+    }
+  };
+
+  const closeTable = async (id) => {
+    try {
+      const response = await fetch(
+        "http://192.168.1.43:8080/table/closeTable/" + id
+      );
+      const data = await response.json();
+      setTableList(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to load tables");
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchTables();
   }, []);
@@ -57,22 +95,30 @@ function TablesListScreen({ navigation }) {
         <FlatList
           data={tableList}
           renderItem={({ item }) => (
-            <Pressable
-              onPress={() =>
-                navigation.navigate("TableMenu", {
-                  tableId: item.id,
-                })
-              }
-            >
-              <View style={styles.itemContainer}>
+            <View style={styles.itemContainer}>
+              <Pressable
+                style={styles.tableInfo}
+                onPress={() =>
+                  navigation.navigate("TableMenu", {
+                    tableId: item.id,
+                  })
+                }
+              >
                 <Text>Table {item.number}</Text>
-              </View>
-            </Pressable>
+              </Pressable>
+
+              {/* Button to the right */}
+              <Button
+                title="Close"
+                onPress={() => closeTable(item.id)} // Call closeTable function with the table ID
+              />
+            </View>
           )}
           keyExtractor={(item) => item.id.toString()}
           ListEmptyComponent={<Text>No tables found</Text>}
         />
       )}
+      <Button title="Add new table" onPress={() => addTable()} />
     </View>
   );
 }
@@ -106,6 +152,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderColor: "black",
     borderWidth: 1,
+    flexDirection: "row", // Align items in a row (text + button)
+    justifyContent: "space-between", // Space out text and button
+    alignItems: "center", // Center vertically
+  },
+  tableInfo: {
+    flex: 1, // Let the text take up as much space as it can
   },
   loadingContainer: {
     flex: 1,

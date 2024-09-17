@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  Modal,
 } from "react-native";
 import BasketItem from "./Components/BasketItem";
 import QuantitySelector from "./Components/QuantitySelector";
@@ -28,6 +29,7 @@ function Menu(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [numberTest, setNumberTest] = useState(0);
 
@@ -247,24 +249,48 @@ function Menu(props) {
             refreshing={refreshing}
             // onRefresh={handleRefresh}
           />
-          <Text>Items selected</Text>
-          <FlatList
-            data={localCart.cartItems.filter((i) => i.payed > 0)}
-            renderItem={({ item }) => {
-              return (
-                <View style={styles.itemContainer}>
-                  <Text>
-                    - {item.payed} x {item.menuItem.title}
-                  </Text>
-                </View>
-              );
-            }}
-            ListEmptyComponent={<Text>No items selected</Text>}
-            refreshing={refreshing}
-            // onRefresh={handleRefresh}
+          {/* <Button title="Validate changes" onPress={() => validateCart()} /> */}
+          <Button
+            title="Validate changes"
+            onPress={() => setIsModalVisible(true)}
           />
-          {/* Add a button under the FlatList */}
-          <Button title="Validate changes" onPress={() => validateCart()} />
+          <Modal
+            visible={isModalVisible}
+            onRequestClose={() => setIsModalVisible(false)}
+            animationType="slide"
+            presentationStyle="formSheet"
+          >
+            <View style={styles.background2}>
+              <Text>Items selected</Text>
+              <FlatList
+                data={localCart.cartItems.filter((i) => i.payed > 0)}
+                renderItem={({ item }) => {
+                  return (
+                    <View style={styles.itemContainer}>
+                      <Text>
+                        - {item.payed} x {item.menuItem.title}
+                      </Text>
+                    </View>
+                  );
+                }}
+                ListEmptyComponent={<Text>No items selected</Text>}
+                refreshing={refreshing}
+                // onRefresh={handleRefresh}
+              />
+              <Button
+                title="Validate payment"
+                onPress={() => {
+                  validateCart();
+                  setIsModalVisible(false);
+                }}
+              />
+              <Button
+                title="Cancel payment"
+                onPress={() => setIsModalVisible(false)}
+                color="red"
+              />
+            </View>
+          </Modal>
         </>
       )}
     </View>
