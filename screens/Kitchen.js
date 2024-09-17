@@ -9,15 +9,15 @@ import {
 } from "react-native";
 import OrderItem from "./Components/OrderItem";
 import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client"; // Import SockJS client
-import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
+import SockJS from "sockjs-client";
+import "text-encoding-polyfill";
 
 function Kitchen(props) {
   const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  const [cart, setCart] = useState([]);
+  const [cartList, setCartList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -39,8 +39,8 @@ function Kitchen(props) {
       // Subscribe to the topic to receive messages
       stompClient.subscribe("/topic/kitchen", (response) => {
         const parsedResponse = JSON.parse(response.body);
-        // console.log(parsedResponse);
-        setCart(parsedResponse);
+        console.log(parsedResponse);
+        setCartList(parsedResponse);
         setIsLoading(false);
         setError("");
       });
@@ -74,11 +74,11 @@ function Kitchen(props) {
   return (
     <View style={styles.container}>
       <FlatList
-        data={cart}
+        data={cartList}
         renderItem={({ item }) => {
           if (
             item.cart.cartItems.filter(
-              (i) => i.menuItem.menuItemType === "MEAL"
+              (i) => i.menuItem.menuItemType === "MEAL" && i.confirmed != 0
             ).length != 0
           ) {
             return (
@@ -105,7 +105,6 @@ function Kitchen(props) {
                     }}
                   />
                 </View>
-                {/* <OrderItem itemName={"normalMenu"} quantity={1} table={"01"} /> */}
               </View>
             );
           }
@@ -141,16 +140,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "black",
   },
-  //   container: {
-  //     flexWrap: "wrap",
-  //     flex: 1,
-  //     flexDirection: "row",
-  //     alignItems: "flex-start",
-  //     borderWidth: 6,
-  //     borderColor: "red",
-  //     gap: 10,
-  //     backgroundColor: "white",
-  //   },
 });
 
 export default Kitchen;

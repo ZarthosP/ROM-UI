@@ -94,12 +94,14 @@ function Menu({ route }) {
   };
 
   const validateCart = () => {
+    console.log("cart validation");
     if (client && isConnected) {
+      const newCompleteCartDto = validatePreSelectedCartItems();
       client.publish({
         destination: "/app/cartWS/completeCart",
         body: JSON.stringify({
           id: cart.id,
-          completeCartDto: validatePreSelectedCartItems(),
+          completeCartDto: newCompleteCartDto,
         }),
       });
     } else {
@@ -128,8 +130,12 @@ function Menu({ route }) {
   };
 
   const validatePreSelectedCartItems = () => {
+    console.log("validatePreSelectedCartItems");
     const updatedCart = cart.cartItems.map((item) => {
       const newConfirmed = item.confirmed + item.preSelected;
+      if (item.id === 952) {
+        console.log("newConfirmed :" + newConfirmed);
+      }
       return { ...item, confirmed: newConfirmed, preSelected: 0 };
     });
     setCart({ ...cart, cartItems: updatedCart });
@@ -147,7 +153,7 @@ function Menu({ route }) {
 
   return (
     <View style={styles.container}>
-      <Button title="Log cart" onPress={() => console.log(cart)}></Button>
+      {/* <Button title="Log cart" onPress={() => console.log(cart)}></Button> */}
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -173,6 +179,7 @@ function Menu({ route }) {
                     quantity={item.quantity}
                     confirmed={item.confirmed}
                     preSelected={item.preSelected}
+                    ready={item.ready}
                   />
                   <Pressable
                     style={styles.removeOrAdd}
@@ -189,7 +196,6 @@ function Menu({ route }) {
             refreshing={refreshing}
             // onRefresh={handleRefresh}
           />
-          {/* Add a button under the FlatList */}
           <Button title="Validate changes" onPress={() => validateCart()} />
         </>
       )}

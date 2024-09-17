@@ -16,14 +16,17 @@ import {
 import BasketItem from "./Components/BasketItem";
 import QuantitySelector from "./Components/QuantitySelector";
 import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client"; // Import SockJS client
-import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
+import SockJS from "sockjs-client";
+import "text-encoding-polyfill";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "react-i18next";
 
-function Menu(props) {
+function Menu({ route }) {
   const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [tableId, setTableId] = useState(route.params.tableId);
+  const { t } = useTranslation();
 
   const [cart, setCart] = useState([]);
   const [localCart, setLocalCart] = useState([]);
@@ -61,7 +64,7 @@ function Menu(props) {
       // Send an initial message to request data as soon as the connection is established
       stompClient.publish({
         destination: "/app/cartWS/completeCart",
-        body: JSON.stringify({ id: 1, completeCartDto: null }),
+        body: JSON.stringify({ id: tableId, completeCartDto: null }),
       });
     };
 
@@ -184,6 +187,19 @@ function Menu(props) {
     return 77;
   };
 
+  const getTotalToPay = () => {
+    let totalToPay = 0;
+
+    // Check if localCart has cartItems array
+    if (localCart.cartItems && localCart.cartItems.length > 0) {
+      localCart.cartItems.forEach((item) => {
+        totalToPay += item.payed * item.menuItem.price;
+      });
+    }
+
+    return totalToPay.toFixed(2); // Return total with two decimal places
+  };
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -205,7 +221,7 @@ function Menu(props) {
 
   return (
     <View style={styles.container}>
-      <Button title="Log cart" onPress={() => console.log(cart)}></Button>
+      {/* <Button title="Log cart" onPress={() => console.log(cart)}></Button>
       <Button title="Log user" onPress={() => getData()}></Button>
       <Button
         title="Log localCart"
@@ -214,43 +230,46 @@ function Menu(props) {
       <Button
         title="Log quantity"
         onPress={() => console.log(numberTest)}
-      ></Button>
+      ></Button> */}
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : (
         <>
-          <Text>To pay</Text>
+          <Text style={styles.titleText}>To pay</Text>
           <FlatList
             data={localCart.cartItems.filter((i) => i.ready > 0 || i.payed > 0)}
             renderItem={({ item }) => {
               return (
                 <View style={styles.itemContainer}>
-                  <BasketItem
-                    title={item.menuItem.title}
-                    price={item.menuItem.price}
-                    quantity={item.quantity}
-                    confirmed={item.confirmed}
-                    preSelected={item.preSelected}
-                    ready={getReadyItemsFromCart(item.id)}
-                    payed={item.payed}
-                  />
-                  <QuantitySelector
-                    ready={item.ready}
-                    payed={item.payed}
-                    change={handleNumberSelectedChange}
-                    id={item.id}
-                    price={item.menuItem.price}
-                  />
+                  <View style={styles.basketItemContainer}>
+                    <BasketItem
+                      title={item.menuItem.title}
+                      price={item.menuItem.price}
+                      quantity={item.quantity}
+                      confirmed={item.confirmed}
+                      preSelected={item.preSelected}
+                      ready={getReadyItemsFromCart(item.id)}
+                      payed={item.payed}
+                    />
+                  </View>
+                  <View style={styles.quantitySelectorContainer}>
+                    <QuantitySelector
+                      ready={item.ready}
+                      payed={item.payed}
+                      change={handleNumberSelectedChange}
+                      id={item.id}
+                      price={item.menuItem.price}
+                    />
+                  </View>
                 </View>
               );
             }}
             ListEmptyComponent={<Text>No items found</Text>}
             refreshing={refreshing}
-            // onRefresh={handleRefresh}
           />
-          {/* <Button title="Validate changes" onPress={() => validateCart()} /> */}
+
           <Button
             title="Validate changes"
             onPress={() => setIsModalVisible(true)}
@@ -259,7 +278,7 @@ function Menu(props) {
             visible={isModalVisible}
             onRequestClose={() => setIsModalVisible(false)}
             animationType="slide"
-            transparent={true} // Make background transparent for the overlay effect
+            transparent={true}
           >
             <View style={styles.modalOverlay}>
               <View style={styles.modalContainer}>
@@ -270,7 +289,14 @@ function Menu(props) {
                     return (
                       <View style={styles.itemContainer}>
                         <Text style={styles.itemText}>
-                          - {item.payed} x {item.menuItem.title}
+                          <Text style={styles.itemPayedText}>
+                            {" "}
+                            - {item.payed}{" "}
+                          </Text>
+                          <Text style={styles.itemMultiplicationSign}> x </Text>
+                          <Text style={styles.itemTitleText}>
+                            {t(item.menuItem.title)}
+                          </Text>
                         </Text>
                       </View>
                     );
@@ -280,6 +306,14 @@ function Menu(props) {
                   }
                   refreshing={refreshing}
                 />
+                <View style={styles.totalContainer}>
+                  <Text style={styles.totalLabelText}>
+                    Total to Pay:{" "}
+                    <Text style={styles.totalAmountText}>
+                      {getTotalToPay()} €
+                    </Text>
+                  </Text>
+                </View>
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.validateButton]}
@@ -314,14 +348,42 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   itemContainer: {
-    backgroundColor: "white",
-    padding: 1,
     flexDirection: "row",
-    justifyContent: "space-around",
+    backgroundColor: "white",
+    padding: 10,
+    justifyContent: "space-between",
     alignItems: "center",
-    alignContent: "center",
-    borderColor: "black",
+    borderColor: "#ccc",
     borderWidth: 1,
+    borderRadius: 8,
+    marginVertical: 5,
+  },
+  basketItemContainer: {
+    flex: 2,
+    marginRight: 10,
+  },
+  quantitySelectorContainer: {
+    flex: 1,
+  },
+  titleText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+    color: "#333",
+  },
+  itemTitleText: {
+    fontWeight: "bold",
+    color: "#000",
+  },
+  itemMultiplicationSign: {
+    color: "#666",
+    fontWeight: "normal",
+    marginHorizontal: 5,
+  },
+  itemPayedText: {
+    fontWeight: "bold",
+    color: "#4CAF50",
   },
   loadingContainer: {
     flex: 1,
@@ -349,7 +411,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
   },
   modalContainer: {
-    width: "90%", // Take up most of the screen width
+    width: "90%",
     backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
@@ -362,9 +424,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   itemText: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#333",
-    marginBottom: 10,
+    textAlign: "left",
   },
   emptyText: {
     fontSize: 16,
@@ -386,15 +448,37 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   validateButton: {
-    backgroundColor: "#4CAF50", // Green for "Validate"
+    backgroundColor: "#4CAF50",
   },
   cancelButton: {
-    backgroundColor: "#FF6347", // Red for "Cancel"
+    backgroundColor: "#FF6347",
   },
   buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  totalContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: "#f7f7f7",
+    borderRadius: 10,
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+  },
+  totalLabelText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  totalAmountText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#4CAF50",
   },
 });
 

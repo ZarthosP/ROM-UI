@@ -1,8 +1,16 @@
 {
     "normalMenu":"Normal Menu",
+    "fishMenu":"Fish Menu",
+    "vegetarianMenu":"Vegetarian Menu",
+
+    "coffee":"Coffee",
+
     "test":"test in English",
     "changeLanguage": "Change language",
     "table": "Table",
     "kitchen": "Kitchen",
-    "basket": "Basket"
+    "basket": "Basket",
+    "currentLanguage": "EN",
+    "addNewTable": "Add new Table",
+    "close": "Close"
 }

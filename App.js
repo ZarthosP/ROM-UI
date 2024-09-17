@@ -45,7 +45,7 @@ export default function App() {
     } catch (e) {
       console.error("Error reading user data", e);
     } finally {
-      setIsLoading(false); // Stop loading once data is fetched
+      setIsLoading(false);
     }
   };
 
@@ -54,7 +54,6 @@ export default function App() {
   }, []);
 
   if (isLoading) {
-    // Display a loading screen while data is being fetched
     return (
       <View style={styles.container}>
         <Text>Loading...</Text>
@@ -65,7 +64,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Basket"
+        initialRouteName="Kitchen"
         screenOptions={{
           tabBarActiveTintColor: "purple",
         }}
@@ -93,7 +92,7 @@ export default function App() {
           <Tab.Screen
             name="Menu"
             component={Menu}
-            initialParams={{ tableId: 3 }}
+            initialParams={{ tableId: 104 }}
             options={{
               tabBarIcon: ({ color }) => (
                 <Ionicons name="book" size={20} color={color} />
@@ -139,6 +138,7 @@ export default function App() {
         <Tab.Screen
           name="Basket"
           component={Basket}
+          initialParams={{ tableId: 104 }}
           options={{
             tabBarLabel: t("basket"),
             tabBarIcon: ({ color }) => (

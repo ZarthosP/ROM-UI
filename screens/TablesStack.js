@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import Menu from "./Menu";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useTranslation } from "react-i18next";
 
-// Define the Stack Navigator for the tables
 const Stack = createNativeStackNavigator();
 
 function TablesListScreen({ navigation }) {
@@ -24,6 +24,8 @@ function TablesListScreen({ navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newTableNumber, setnewTableNumber] = useState();
   const [newTableNumberOfClients, setnewTableNumberOfClients] = useState();
+
+  const { t } = useTranslation();
 
   const fetchTables = async () => {
     try {
@@ -110,7 +112,7 @@ function TablesListScreen({ navigation }) {
                   })
                 }
               >
-                <Text>Table {item.number}</Text>
+                <Text>Table {item.number} </Text>
               </Pressable>
 
               <TouchableOpacity
@@ -125,7 +127,7 @@ function TablesListScreen({ navigation }) {
                     },
                   ]}
                 >
-                  Close
+                  {t("close")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -134,7 +136,10 @@ function TablesListScreen({ navigation }) {
           ListEmptyComponent={<Text>No tables found</Text>}
         />
       )}
-      <Button title="Add new table" onPress={() => setIsModalVisible(true)} />
+      <Button
+        title={t("addNewTable")}
+        onPress={() => setIsModalVisible(true)}
+      />
       <Modal
         visible={isModalVisible}
         onRequestClose={() => setIsModalVisible(false)}
@@ -261,7 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
   },
   modalContainer: {
-    width: "90%", // Take up most of the screen width
+    width: "90%",
     backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
@@ -304,10 +309,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   addButton: {
-    backgroundColor: "#4CAF50", // Green for "Add"
+    backgroundColor: "#4CAF50",
   },
   cancelButton: {
-    backgroundColor: "#FF6347", // Red for "Cancel"
+    backgroundColor: "#FF6347",
   },
   buttonText: {
     color: "black",
