@@ -87,7 +87,7 @@ const LoginForm = () => {
           source={require("../assets/adaptive-icon.png")}
           style={{
             width: 200,
-            height: 400,
+            height: 200,
             alignSelf: "center",
             marginBottom: 50,
           }}
@@ -117,7 +117,7 @@ const LoginForm = () => {
 
         <Button title="Login" onPress={handleSubmit} />
         <></>
-        <Button title="Log user" onPress={() => getData()} />
+        {/* <Button title="Log user" onPress={() => getData()} /> */}
       </View>
     </KeyboardAvoidingView>
   );

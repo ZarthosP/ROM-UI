@@ -1,2 +1,9 @@
+Add communication between client and staff, and staff and kitchen (add button to call waiter?)
+Add modal confirmation to Menu screen + separate DRINK MEAL and DESSERT
+Add already payed to basket
+Add real payment screen
+
 Make app landscape compatible (useWindowsDimensions)
-Use FlatList to render lists of objects
+
+Add function so server can make client open their menu/basket table
+Add "review your experience" component after paying the bill

@@ -12,6 +12,7 @@ import {
   TextInput,
 } from "react-native";
 import Menu from "./Menu";
+import Basket from "./Basket";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 
@@ -109,11 +110,32 @@ function TablesListScreen({ navigation }) {
                 onPress={() =>
                   navigation.navigate("TableMenu", {
                     tableId: item.id,
+                    tableNumber: item.number,
                   })
                 }
               >
                 <Text>Table {item.number} </Text>
               </Pressable>
+
+              <TouchableOpacity
+                style={styles.roundButton}
+                onPress={() =>
+                  navigation.navigate("TableBasket", {
+                    tableId: item.id,
+                    tableNumber: item.number,
+                  })}
+              >
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {
+                      color: "black",
+                    },
+                  ]}
+                >
+                  {t("basket")}
+                </Text>
+              </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.roundButton}
@@ -199,12 +221,21 @@ function TablesStack() {
       <Stack.Screen
         name="TablesList"
         component={TablesListScreen}
-        options={{ title: "Tables", headerShown: false }}
+        options={{ title: "Tables" }}
       />
       <Stack.Screen
         name="TableMenu"
         component={Menu}
-        options={{ title: "Table Details" }}
+        options={({ route }) => ({
+          title: `Table ${route.params.tableNumber} Details`,
+        })}
+      />
+      <Stack.Screen
+        name="TableBasket"
+        component={Basket}
+        options={({ route }) => ({
+          title: `Table ${route.params.tableNumber} Basket`,
+        })}
       />
     </Stack.Navigator>
   );

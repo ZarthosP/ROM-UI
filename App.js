@@ -76,6 +76,7 @@ export default function App() {
             name="Tables"
             component={TablesStack}
             options={{
+              headerShown: false,
               tabBarIcon: ({ color }) => (
                 <Ionicons name="list" size={20} color={color} />
               ),
@@ -88,12 +89,14 @@ export default function App() {
         {!loggedUser ||
         (loggedUser &&
           loggedUser.userType !== "KITCHEN" &&
-          loggedUser.userType !== "BAR") ? (
+          loggedUser.userType !== "BAR" &&
+          loggedUser.userType !== "SERVER") ? (
           <Tab.Screen
             name="Menu"
             component={Menu}
             initialParams={{ tableId: 104 }}
             options={{
+              title: "Menu Table 8",
               tabBarIcon: ({ color }) => (
                 <Ionicons name="book" size={20} color={color} />
               ),
@@ -135,6 +138,8 @@ export default function App() {
         ) : (
           <></>
         )}
+        {!loggedUser ||
+        (loggedUser && loggedUser.userType === "SERVER" || loggedUser.userType === "ADMIN" || loggedUser.userType === "CLIENT") ? (
         <Tab.Screen
           name="Basket"
           component={Basket}
@@ -145,9 +150,12 @@ export default function App() {
               <Ionicons name="bag" size={20} color={color} />
             ),
             headerRight: () => <LanguageModal />,
-            tabBarBadge: 3,
+            // tabBarBadge: 3,
           }}
         />
+      ) : (
+        <></>
+      )}
         {!loggedUser ? (
           <Tab.Screen
             name="Login"
@@ -158,7 +166,7 @@ export default function App() {
                 <Ionicons name="person" size={20} color={color} />
               ),
               headerRight: () => <LanguageModal />,
-              tabBarBadge: 3,
+              // tabBarBadge: 3,
             }}
           />
         ) : (
@@ -177,7 +185,7 @@ export default function App() {
                 <Ionicons name="person" size={20} color={color} />
               ),
               headerRight: () => <LanguageModal />,
-              tabBarBadge: 3,
+              // tabBarBadge: 3,
             }}
           />
         ) : (
