@@ -14,5 +14,9 @@
     "addNewTable": "Add new Table",
     "close": "Close",
     "callWaiter": "Call Waiter",
-    "waiterOnHisWay": "Waiter on his way"
+    "waiterOnHisWay": "Waiter on his way",
+    "meals": "Meals",
+    "drinks": "Drinks",
+    "desserts": "Desserts"
+    
 }

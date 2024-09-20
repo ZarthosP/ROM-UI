@@ -1,35 +1,42 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Pressable } from "react-native";
+import React from "react";
+import { Text, View, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 
 function MenuItem({ title, quantity, price, confirmed, preSelected, ready }) {
-  const [quantityLocal, setQuantity] = useState(quantity);
   const { t } = useTranslation();
   return (
-    <View style={{ width: "71%" }}>
-      <Text style={styles.text}>
-        {t(title)} {price} €
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        {t(title)} - {price}€
       </Text>
-      <Text style={[styles.text, { fontSize: 20 }]}>
-        Selected: {preSelected}
-      </Text>
-      {confirmed + ready > 0 ? (
-        <Text style={[styles.text, { fontSize: 12, color: "red" }]}>
+      <Text style={styles.subText}>Selected: {preSelected}</Text>
+      {confirmed + ready > 0 && (
+        <Text style={styles.subTextRed}>
           Already ordered: {confirmed + ready}
         </Text>
-      ) : (
-        <></>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 20,
+  container: {
+    flex: 1,
+    paddingHorizontal: 10,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
-    color: "black",
+    color: "#333",
+  },
+  subText: {
+    fontSize: 14,
+    color: "#666",
+  },
+  subTextRed: {
+    fontSize: 12,
+    color: "red",
   },
 });
 

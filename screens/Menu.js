@@ -3,18 +3,15 @@ import {
   Text,
   View,
   StyleSheet,
-  ScrollView,
+  SectionList,
   Button,
-  FlatList,
-  Platform,
   ActivityIndicator,
   Alert,
   Pressable,
 } from "react-native";
 import MenuItem from "./Components/MenuItem";
 import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client"; // Import SockJS client
-import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
+import SockJS from "sockjs-client";
 import { useTranslation } from "react-i18next";
 
 function Menu({ route }) {
@@ -22,10 +19,8 @@ function Menu({ route }) {
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [tableId, setTableId] = useState(route.params.tableId);
-
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [isWaiterCalled, setIsWaiterCalled] = useState(false);
 
@@ -40,41 +35,30 @@ function Menu({ route }) {
       heartbeatOutgoing: 4000,
     });
 
-    // Handle successful connection
     stompClient.onConnect = () => {
-      // console.log("Connected to WebSocket");
       setIsConnected(true);
-
-      // Subscribe to the topic to receive messages
       stompClient.subscribe("/topic/cart", (response) => {
         const parsedResponse = JSON.parse(response.body);
         setCart(parsedResponse);
         setIsLoading(false);
         setError("");
       });
-
-      // Send an initial message to request data as soon as the connection is established
       stompClient.publish({
         destination: "/app/cartWS/completeCart",
         body: JSON.stringify({ id: tableId, completeCartDto: null }),
       });
     };
 
-    // Handle errors during connection or session
     stompClient.onStompError = (frame) => {
-      console.error("Broker reported error: ", frame.headers["message"]);
-      console.error("Additional details: ", frame.body);
       Alert.alert(
         "WebSocket Error",
         "Failed to connect or maintain the WebSocket connection."
       );
     };
 
-    // Activate the client to start the connection process
     stompClient.activate();
     setClient(stompClient);
 
-    // Clean up the client when the component is unmounted
     return () => {
       stompClient.deactivate();
     };
@@ -90,15 +74,11 @@ function Menu({ route }) {
         }),
       });
     } else {
-      Alert.alert(
-        "Connection Error",
-        "WebSocket is not connected. Please wait and try again."
-      );
+      Alert.alert("Connection Error", "WebSocket is not connected.");
     }
   };
 
   const validateCart = () => {
-    console.log("cart validation");
     if (client && isConnected) {
       const newCompleteCartDto = validatePreSelectedCartItems();
       client.publish({
@@ -109,10 +89,7 @@ function Menu({ route }) {
         }),
       });
     } else {
-      Alert.alert(
-        "Connection Error",
-        "WebSocket is not connected. Please wait and try again."
-      );
+      Alert.alert("Connection Error", "WebSocket is not connected.");
     }
   };
 
@@ -134,12 +111,8 @@ function Menu({ route }) {
   };
 
   const validatePreSelectedCartItems = () => {
-    console.log("validatePreSelectedCartItems");
     const updatedCart = cart.cartItems.map((item) => {
       const newConfirmed = item.confirmed + item.preSelected;
-      if (item.id === 952) {
-        console.log("newConfirmed :" + newConfirmed);
-      }
       return { ...item, confirmed: newConfirmed, preSelected: 0 };
     });
     setCart({ ...cart, cartItems: updatedCart });
@@ -157,29 +130,54 @@ function Menu({ route }) {
 
       setTimeout(() => {
         setIsWaiterCalled(false);
-      }, 180000);
+      }, 3000);
     } catch (error) {
-      console.error("Error fetching data:", error);
       setError("Failed to load tables");
       setIsLoading(false);
     }
   };
 
+  // Group items by their menuItemType into sections
+  const sections = [
+    {
+      title: t("meals"),
+      data: cart.cartItems
+        ? cart.cartItems.filter((item) => item.menuItem.menuItemType === "MEAL")
+        : [],
+    },
+    {
+      title: t("drinks"),
+      data: cart.cartItems
+        ? cart.cartItems.filter(
+            (item) => item.menuItem.menuItemType === "DRINK"
+          )
+        : [],
+    },
+    {
+      title: t("desserts"),
+      data: cart.cartItems
+        ? cart.cartItems.filter(
+            (item) => item.menuItem.menuItemType === "DESSERT"
+          )
+        : [],
+    },
+  ];
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="0000ff"></ActivityIndicator>
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* <Button title="Log cart" onPress={() => console.log(cart)}></Button> */}
       <Button
         title={isWaiterCalled ? t("waiterOnHisWay") : t("callWaiter")}
-        onPress={() => addWaiterNotification()}
+        onPress={addWaiterNotification}
+        color="#f57c00"
       />
       {error ? (
         <View style={styles.errorContainer}>
@@ -187,43 +185,49 @@ function Menu({ route }) {
         </View>
       ) : (
         <>
-          <FlatList
-            data={cart.cartItems}
-            renderItem={({ item }) => {
-              return (
-                <View style={styles.box}>
-                  <Pressable
-                    style={styles.removeOrAdd}
-                    onPress={() =>
-                      changeItemQuantity(item.id, item.preSelected - 1)
-                    }
-                  >
-                    <Text style={styles.textRemoveOrAdd}>-</Text>
-                  </Pressable>
-                  <MenuItem
-                    title={item.menuItem.title}
-                    price={item.menuItem.price}
-                    quantity={item.quantity}
-                    confirmed={item.confirmed}
-                    preSelected={item.preSelected}
-                    ready={item.ready}
-                  />
-                  <Pressable
-                    style={styles.removeOrAdd}
-                    onPress={() =>
-                      changeItemQuantity(item.id, item.preSelected + 1)
-                    }
-                  >
-                    <Text style={styles.textRemoveOrAdd}>+</Text>
-                  </Pressable>
-                </View>
-              );
-            }}
+          {/* SectionList rendering sections */}
+          <SectionList
+            sections={sections}
+            keyExtractor={(item) => item.id.toString()}
+            renderSectionHeader={({ section: { title } }) => (
+              <Text style={styles.sectionHeader}>{title}</Text>
+            )}
+            renderItem={({ item }) => (
+              <View style={styles.box}>
+                <Pressable
+                  style={styles.button}
+                  onPress={() =>
+                    changeItemQuantity(item.id, item.preSelected - 1)
+                  }
+                >
+                  <Text style={styles.buttonText}>-</Text>
+                </Pressable>
+                <MenuItem
+                  title={item.menuItem.title}
+                  price={item.menuItem.price}
+                  quantity={item.quantity}
+                  confirmed={item.confirmed}
+                  preSelected={item.preSelected}
+                  ready={item.ready}
+                />
+                <Pressable
+                  style={styles.button}
+                  onPress={() =>
+                    changeItemQuantity(item.id, item.preSelected + 1)
+                  }
+                >
+                  <Text style={styles.buttonText}>+</Text>
+                </Pressable>
+              </View>
+            )}
             ListEmptyComponent={<Text>No items found</Text>}
-            refreshing={refreshing}
-            // onRefresh={handleRefresh}
           />
-          <Button title="Validate changes" onPress={() => validateCart()} />
+
+          <Button
+            title={t("validateChanges")}
+            onPress={validateCart}
+            color="#388e3c"
+          />
         </>
       )}
     </View>
@@ -233,61 +237,69 @@ function Menu({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 30,
-    backgroundColor: "white",
+    padding: 16,
+    backgroundColor: "#f4f4f9",
   },
   box: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    margin: 16,
-    borderColor: "rgba(39, 19, 10, 1)",
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
-    alignContent: "center",
-    elevation: 5,
+    padding: 16,
+    marginBottom: 16,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#ddd",
     shadowColor: "#000",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
   },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 18,
+    color: "#555",
+  },
   errorContainer: {
-    backgroundColor: "#FFC0CB",
     padding: 16,
+    backgroundColor: "#fce4e4",
     borderRadius: 8,
-    borderWidth: 1,
-    margin: 16,
-    alignItems: "center",
+    marginVertical: 10,
   },
   errorText: {
-    color: "#D8000C",
+    color: "#d32f2f",
     fontSize: 16,
     textAlign: "center",
   },
-  removeOrAdd: {
-    flex: 1,
-    borderRadius: 16,
-    borderWidth: 1,
-    backgroundColor: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    aspectRatio: 1,
-    alignItems: "center",
+  button: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#f5f5f5",
     justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
   },
-  textRemoveOrAdd: {
+  buttonText: {
     fontSize: 24,
     fontWeight: "bold",
-    textAlign: "center",
-    color: "black",
+    color: "#333",
+  },
+  sectionHeader: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#333",
+    backgroundColor: "#f0f0f5",
+    padding: 8,
+    borderRadius: 5,
   },
 });
 

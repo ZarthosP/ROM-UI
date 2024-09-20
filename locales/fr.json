@@ -14,5 +14,8 @@
     "addNewTable": "Ajouter une Table",
     "close": "Fermer",
     "callWaiter": "Appeler le serveur",
-    "waiterOnHisWay": "Le serveur viendra bientôt"
+    "waiterOnHisWay": "Le serveur viendra bientôt",
+    "meals": "Menus",
+    "drinks": "Boissons",
+    "desserts": "Desserts"
 }
