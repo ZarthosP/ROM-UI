@@ -15,10 +15,16 @@ import Menu from "./Menu";
 import Basket from "./Basket";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client"; // Import SockJS client
+import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
 
 const Stack = createNativeStackNavigator();
 
 function TablesListScreen({ navigation }) {
+  const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
+  const [client, setClient] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [tableList, setTableList] = useState([]);
   const [error, setError] = useState("");
@@ -81,8 +87,78 @@ function TablesListScreen({ navigation }) {
     }
   };
 
+  const removeNotification = async (table) => {
+    try {
+      const response = await fetch(
+        "http://192.168.1.43:8080/table/removeNotification",
+        {
+          method: "post",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(table),
+        }
+      );
+      const data = await response.json();
+      setTableList(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to load tables");
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchTables();
+
+    // Initialize the STOMP client
+    const stompClient = new Client({
+      webSocketFactory: () => new SockJS(WEBSOCKET_URL),
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    // Handle successful connection
+    stompClient.onConnect = () => {
+      // console.log("Connected to WebSocket");
+      setIsConnected(true);
+
+      // Subscribe to the topic to receive messages
+      stompClient.subscribe("/topic/alerts", (response) => {
+        const parsedResponse = JSON.parse(response.body);
+        console.log(parsedResponse);
+        setTableList(parsedResponse);
+        setIsLoading(false);
+        setError("");
+      });
+
+      // // Send an initial message to request data as soon as the connection is established
+      // stompClient.publish({
+      //   destination: "/app/cartWS/completeCart",
+      //   body: JSON.stringify({ id: tableId, completeCartDto: null }),
+      // });
+    };
+
+    // Handle errors during connection or session
+    stompClient.onStompError = (frame) => {
+      console.error("Broker reported error: ", frame.headers["message"]);
+      console.error("Additional details: ", frame.body);
+      Alert.alert(
+        "WebSocket Error",
+        "Failed to connect or maintain the WebSocket connection."
+      );
+    };
+
+    // Activate the client to start the connection process
+    stompClient.activate();
+    setClient(stompClient);
+
+    // Clean up the client when the component is unmounted
+    return () => {
+      stompClient.deactivate();
+    };
   }, []);
 
   if (isLoading) {
@@ -96,6 +172,10 @@ function TablesListScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <Button
+        title="Log table list"
+        onPress={() => console.log(tableList)}
+      ></Button>
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -117,13 +197,119 @@ function TablesListScreen({ navigation }) {
                 <Text>Table {item.number} </Text>
               </Pressable>
 
+              {item.clientNotification ? (
+                <TouchableOpacity
+                  style={styles.roundButton}
+                  onPress={() => {
+                    const updatedTable = {
+                      ...item,
+                      clientNotification: false,
+                    };
+
+                    const updatedTableList = tableList.map((table) => {
+                      if (table.id === item.id) {
+                        return updatedTable;
+                      }
+                      return table;
+                    });
+
+                    setTableList(updatedTableList);
+                    removeNotification(updatedTable);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      {
+                        color: "red",
+                      },
+                    ]}
+                  >
+                    C
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <></>
+              )}
+
+              {item.kitchenNotification ? (
+                <TouchableOpacity
+                  style={styles.roundButton}
+                  onPress={() => {
+                    const updatedTable = {
+                      ...item,
+                      kitchenNotification: false,
+                    };
+
+                    const updatedTableList = tableList.map((table) => {
+                      if (table.id === item.id) {
+                        return updatedTable;
+                      }
+                      return table;
+                    });
+
+                    setTableList(updatedTableList);
+                    removeNotification(updatedTable);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      {
+                        color: "red",
+                      },
+                    ]}
+                  >
+                    K
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <></>
+              )}
+
+              {item.barNotification ? (
+                <TouchableOpacity
+                  style={styles.roundButton}
+                  onPress={() => {
+                    const updatedTable = {
+                      ...item,
+                      barNotification: false,
+                    };
+
+                    const updatedTableList = tableList.map((table) => {
+                      if (table.id === item.id) {
+                        return updatedTable;
+                      }
+                      return table;
+                    });
+
+                    setTableList(updatedTableList);
+                    removeNotification(updatedTable);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      {
+                        color: "red",
+                      },
+                    ]}
+                  >
+                    B
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <></>
+              )}
+
               <TouchableOpacity
                 style={styles.roundButton}
                 onPress={() =>
                   navigation.navigate("TableBasket", {
                     tableId: item.id,
                     tableNumber: item.number,
-                  })}
+                  })
+                }
               >
                 <Text
                   style={[
@@ -280,7 +466,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   roundButton: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 5,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",

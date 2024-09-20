@@ -12,5 +12,7 @@
     "basket": "Panier",
     "currentLanguage": "FR",
     "addNewTable": "Ajouter une Table",
-    "close": "Fermer"
+    "close": "Fermer",
+    "callWaiter": "Appeler le serveur",
+    "waiterOnHisWay": "Le serveur viendra bientôt"
 }

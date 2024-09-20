@@ -64,7 +64,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Kitchen"
+        initialRouteName="Tables"
         screenOptions={{
           tabBarActiveTintColor: "purple",
         }}
@@ -139,23 +139,25 @@ export default function App() {
           <></>
         )}
         {!loggedUser ||
-        (loggedUser && loggedUser.userType === "SERVER" || loggedUser.userType === "ADMIN" || loggedUser.userType === "CLIENT") ? (
-        <Tab.Screen
-          name="Basket"
-          component={Basket}
-          initialParams={{ tableId: 104 }}
-          options={{
-            tabBarLabel: t("basket"),
-            tabBarIcon: ({ color }) => (
-              <Ionicons name="bag" size={20} color={color} />
-            ),
-            headerRight: () => <LanguageModal />,
-            // tabBarBadge: 3,
-          }}
-        />
-      ) : (
-        <></>
-      )}
+        (loggedUser && loggedUser.userType === "SERVER") ||
+        loggedUser.userType === "ADMIN" ||
+        loggedUser.userType === "CLIENT" ? (
+          <Tab.Screen
+            name="Basket"
+            component={Basket}
+            initialParams={{ tableId: 104 }}
+            options={{
+              tabBarLabel: t("basket"),
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="bag" size={20} color={color} />
+              ),
+              headerRight: () => <LanguageModal />,
+              // tabBarBadge: 3,
+            }}
+          />
+        ) : (
+          <></>
+        )}
         {!loggedUser ? (
           <Tab.Screen
             name="Login"

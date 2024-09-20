@@ -15,6 +15,7 @@ import MenuItem from "./Components/MenuItem";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client"; // Import SockJS client
 import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
+import { useTranslation } from "react-i18next";
 
 function Menu({ route }) {
   const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
@@ -26,6 +27,9 @@ function Menu({ route }) {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [isWaiterCalled, setIsWaiterCalled] = useState(false);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Initialize the STOMP client
@@ -142,6 +146,25 @@ function Menu({ route }) {
     return { ...cart, cartItems: updatedCart };
   };
 
+  const addWaiterNotification = async () => {
+    try {
+      const response = await fetch(
+        "http://192.168.1.43:8080/table/callWaiter/" + tableId
+      );
+      const data = await response.json();
+      setIsWaiterCalled(true);
+      setIsLoading(false);
+
+      setTimeout(() => {
+        setIsWaiterCalled(false);
+      }, 180000);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to load tables");
+      setIsLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -154,6 +177,10 @@ function Menu({ route }) {
   return (
     <View style={styles.container}>
       {/* <Button title="Log cart" onPress={() => console.log(cart)}></Button> */}
+      <Button
+        title={isWaiterCalled ? t("waiterOnHisWay") : t("callWaiter")}
+        onPress={() => addWaiterNotification()}
+      />
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>

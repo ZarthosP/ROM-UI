@@ -12,5 +12,7 @@
     "basket": "Basket",
     "currentLanguage": "EN",
     "addNewTable": "Add new Table",
-    "close": "Close"
+    "close": "Close",
+    "callWaiter": "Call Waiter",
+    "waiterOnHisWay": "Waiter on his way"
 }
