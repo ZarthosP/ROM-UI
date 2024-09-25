@@ -17,5 +17,10 @@
     "waiterOnHisWay": "Le serveur viendra bientôt",
     "meals": "Menus",
     "drinks": "Boissons",
-    "desserts": "Desserts"
+    "desserts": "Desserts",
+    "validateMenu": "Valider nouveaux items",
+    "noItemsSelected": "Pas de nouveaux items séléctionnés",
+    "itemsSelected": "Nouveaux items séléctionnés",
+    "validateItems": "Valider items",
+    "cancel": "Annuler"
 }

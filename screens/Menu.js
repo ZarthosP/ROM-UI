@@ -8,6 +8,9 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  Modal,
+  FlatList,
+  TouchableOpacity,
 } from "react-native";
 import MenuItem from "./Components/MenuItem";
 import { Client } from "@stomp/stompjs";
@@ -23,6 +26,8 @@ function Menu({ route }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [isWaiterCalled, setIsWaiterCalled] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { t } = useTranslation();
 
@@ -179,6 +184,11 @@ function Menu({ route }) {
         onPress={addWaiterNotification}
         color="#f57c00"
       />
+      <Button
+        title="log cart"
+        onPress={() => console.log(cart)}
+        color="#f57c00"
+      />
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -224,10 +234,66 @@ function Menu({ route }) {
           />
 
           <Button
-            title={t("validateChanges")}
-            onPress={validateCart}
+            title={t("validateMenu")}
+            onPress={() => setIsModalVisible(true)}
             color="#388e3c"
           />
+
+          <Modal
+            visible={isModalVisible}
+            onRequestClose={() => setIsModalVisible(false)}
+            animationType="slide"
+            transparent={true}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>{t("itemsSelected")}</Text>
+                <FlatList
+                  data={cart.cartItems.filter((i) => i.preSelected > 0)}
+                  renderItem={({ item }) => {
+                    return (
+                      <View style={styles.itemContainer}>
+                        <Text style={styles.itemText}>
+                          <Text style={styles.itemPayedText}>
+                            {" "}
+                            - {item.preSelected}{" "}
+                          </Text>
+                          <Text style={styles.itemMultiplicationSign}> x </Text>
+                          <Text style={styles.itemTitleText}>
+                            {t(item.menuItem.title)}
+                          </Text>
+                        </Text>
+                      </View>
+                    );
+                  }}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>{t("noItemsSelected")}</Text>
+                  }
+                  refreshing={refreshing}
+                />
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.validateButton]}
+                    onPress={() => {
+                      validateCart();
+                      setIsModalVisible(false);
+                    }}
+                  >
+                    <Text style={styles.modalButtonText}>
+                      {t("validateItems")}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => setIsModalVisible(false)}
+                  >
+                    <Text style={styles.modalButtonText}>{t("cancel")}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </>
       )}
     </View>
@@ -300,6 +366,75 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f5",
     padding: 8,
     borderRadius: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+  },
+  modalContainer: {
+    width: "90%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 20,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 5,
+  },
+  validateButton: {
+    backgroundColor: "#4CAF50",
+  },
+  cancelButton: {
+    backgroundColor: "#FF6347",
+  },
+  modalButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  itemContainer: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    padding: 10,
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    marginVertical: 5,
+  },
+  itemText: {
+    fontSize: 18,
+    color: "#333",
+    textAlign: "left",
+  },
+  itemPayedText: {
+    fontWeight: "bold",
+    color: "#4CAF50",
+  },
+  itemMultiplicationSign: {
+    color: "#666",
+    fontWeight: "normal",
+    marginHorizontal: 5,
   },
 });
 

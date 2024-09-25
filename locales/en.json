@@ -17,6 +17,11 @@
     "waiterOnHisWay": "Waiter on his way",
     "meals": "Meals",
     "drinks": "Drinks",
-    "desserts": "Desserts"
+    "desserts": "Desserts",
+    "validateMenu": "Validate new items",
+    "noItemsSelected": "No new items selected",
+    "itemsSelected": "Items selected",
+    "validateItems": "Validate items",
+    "cancel": "Cancel"
     
 }
