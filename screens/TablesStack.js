@@ -16,8 +16,8 @@ import Basket from "./Basket";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useTranslation } from "react-i18next";
 import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client"; // Import SockJS client
-import "text-encoding-polyfill"; // Polyfill for TextEncoder and TextDecoder
+import SockJS from "sockjs-client";
+import "text-encoding-polyfill";
 
 const Stack = createNativeStackNavigator();
 
@@ -112,7 +112,6 @@ function TablesListScreen({ navigation }) {
   useEffect(() => {
     fetchTables();
 
-    // Initialize the STOMP client
     const stompClient = new Client({
       webSocketFactory: () => new SockJS(WEBSOCKET_URL),
       reconnectDelay: 5000,
@@ -120,42 +119,24 @@ function TablesListScreen({ navigation }) {
       heartbeatOutgoing: 4000,
     });
 
-    // Handle successful connection
     stompClient.onConnect = () => {
-      // console.log("Connected to WebSocket");
       setIsConnected(true);
-
-      // Subscribe to the topic to receive messages
       stompClient.subscribe("/topic/alerts", (response) => {
         const parsedResponse = JSON.parse(response.body);
-        console.log(parsedResponse);
         setTableList(parsedResponse);
         setIsLoading(false);
         setError("");
       });
-
-      // // Send an initial message to request data as soon as the connection is established
-      // stompClient.publish({
-      //   destination: "/app/cartWS/completeCart",
-      //   body: JSON.stringify({ id: tableId, completeCartDto: null }),
-      // });
     };
 
-    // Handle errors during connection or session
     stompClient.onStompError = (frame) => {
       console.error("Broker reported error: ", frame.headers["message"]);
       console.error("Additional details: ", frame.body);
-      Alert.alert(
-        "WebSocket Error",
-        "Failed to connect or maintain the WebSocket connection."
-      );
     };
 
-    // Activate the client to start the connection process
     stompClient.activate();
     setClient(stompClient);
 
-    // Clean up the client when the component is unmounted
     return () => {
       stompClient.deactivate();
     };
@@ -164,18 +145,15 @@ function TablesListScreen({ navigation }) {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="0000ff" />
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Button
-        title="Log table list"
-        onPress={() => console.log(tableList)}
-      ></Button>
+      <Button title="Log table list" onPress={() => console.log(tableList)} />
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -194,113 +172,68 @@ function TablesListScreen({ navigation }) {
                   })
                 }
               >
-                <Text>Table {item.number} </Text>
+                <Text style={styles.tableText}>Table {item.number} </Text>
               </Pressable>
 
               {item.clientNotification ? (
                 <TouchableOpacity
-                  style={styles.roundButton}
+                  style={styles.notificationButton}
                   onPress={() => {
                     const updatedTable = {
                       ...item,
                       clientNotification: false,
                     };
-
-                    const updatedTableList = tableList.map((table) => {
-                      if (table.id === item.id) {
-                        return updatedTable;
-                      }
-                      return table;
-                    });
-
-                    setTableList(updatedTableList);
+                    setTableList((prev) =>
+                      prev.map((table) =>
+                        table.id === item.id ? updatedTable : table
+                      )
+                    );
                     removeNotification(updatedTable);
                   }}
                 >
-                  <Text
-                    style={[
-                      styles.buttonText,
-                      {
-                        color: "red",
-                      },
-                    ]}
-                  >
-                    C
-                  </Text>
+                  <Text style={styles.notificationText}>C</Text>
                 </TouchableOpacity>
-              ) : (
-                <></>
-              )}
+              ) : null}
 
               {item.kitchenNotification ? (
                 <TouchableOpacity
-                  style={styles.roundButton}
+                  style={styles.notificationButton}
                   onPress={() => {
                     const updatedTable = {
                       ...item,
                       kitchenNotification: false,
                     };
-
-                    const updatedTableList = tableList.map((table) => {
-                      if (table.id === item.id) {
-                        return updatedTable;
-                      }
-                      return table;
-                    });
-
-                    setTableList(updatedTableList);
+                    setTableList((prev) =>
+                      prev.map((table) =>
+                        table.id === item.id ? updatedTable : table
+                      )
+                    );
                     removeNotification(updatedTable);
                   }}
                 >
-                  <Text
-                    style={[
-                      styles.buttonText,
-                      {
-                        color: "red",
-                      },
-                    ]}
-                  >
-                    K
-                  </Text>
+                  <Text style={styles.notificationText}>K</Text>
                 </TouchableOpacity>
-              ) : (
-                <></>
-              )}
+              ) : null}
 
               {item.barNotification ? (
                 <TouchableOpacity
-                  style={styles.roundButton}
+                  style={styles.notificationButton}
                   onPress={() => {
                     const updatedTable = {
                       ...item,
                       barNotification: false,
                     };
-
-                    const updatedTableList = tableList.map((table) => {
-                      if (table.id === item.id) {
-                        return updatedTable;
-                      }
-                      return table;
-                    });
-
-                    setTableList(updatedTableList);
+                    setTableList((prev) =>
+                      prev.map((table) =>
+                        table.id === item.id ? updatedTable : table
+                      )
+                    );
                     removeNotification(updatedTable);
                   }}
                 >
-                  <Text
-                    style={[
-                      styles.buttonText,
-                      {
-                        color: "red",
-                      },
-                    ]}
-                  >
-                    B
-                  </Text>
+                  <Text style={styles.notificationText}>B</Text>
                 </TouchableOpacity>
-              ) : (
-                <></>
-              )}
+              ) : null}
 
               <TouchableOpacity
                 style={styles.roundButton}
@@ -311,37 +244,21 @@ function TablesListScreen({ navigation }) {
                   })
                 }
               >
-                <Text
-                  style={[
-                    styles.buttonText,
-                    {
-                      color: "black",
-                    },
-                  ]}
-                >
-                  {t("basket")}
-                </Text>
+                <Text style={styles.buttonText}>{t("basket")}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.roundButton}
                 onPress={() => closeTable(item.id)}
               >
-                <Text
-                  style={[
-                    styles.buttonText,
-                    {
-                      color: "black",
-                    },
-                  ]}
-                >
-                  {t("close")}
-                </Text>
+                <Text style={styles.buttonText}>{t("close")}</Text>
               </TouchableOpacity>
             </View>
           )}
           keyExtractor={(item) => item.id.toString()}
-          ListEmptyComponent={<Text>No tables found</Text>}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>No tables found</Text>
+          }
         />
       )}
       <Button
@@ -430,27 +347,41 @@ function TablesStack() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#F8F8F8",
   },
   itemContainer: {
-    backgroundColor: "white",
-    padding: 10,
+    backgroundColor: "#FFFFFF",
+    padding: 15,
     marginVertical: 8,
     marginHorizontal: 16,
-    borderColor: "black",
+    borderColor: "#DDD",
     borderWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   tableInfo: {
     flex: 1,
+  },
+  tableText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#555",
+    marginTop: 10,
   },
   errorContainer: {
     padding: 16,
@@ -466,34 +397,61 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   roundButton: {
-    paddingHorizontal: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 20,
+    backgroundColor: "#F0F0F0",
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 8,
+    marginLeft: 10,
   },
-  buttonText: {
+  notificationButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 15,
+    backgroundColor: "#FFD700",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 10,
+  },
+  notificationText: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "red",
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  emptyText: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#999",
   },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
     width: "90%",
-    backgroundColor: "white",
+    backgroundColor: "#FFF",
     padding: 20,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 20,
+    color: "#333",
   },
   input: {
     width: "100%",
@@ -510,7 +468,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
     fontWeight: "bold",
-    textAlign: "left",
+    color: "#555",
   },
   modalButtons: {
     flexDirection: "row",
@@ -532,7 +490,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF6347",
   },
   buttonText: {
-    color: "black",
+    color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
   },
