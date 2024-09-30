@@ -64,7 +64,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Tables"
+        initialRouteName="Basket"
         screenOptions={{
           tabBarActiveTintColor: "purple",
         }}

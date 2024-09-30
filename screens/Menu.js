@@ -28,6 +28,8 @@ function Menu({ route }) {
   const [isWaiterCalled, setIsWaiterCalled] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isAlreadyPayedListVisible, setiIsAlreadyPayedListVisible] =
+    useState(false);
 
   const { t } = useTranslation();
 
@@ -70,16 +72,18 @@ function Menu({ route }) {
   }, []);
 
   const changeItemQuantity = (id, newPreSelectedValue) => {
-    if (client && isConnected) {
-      client.publish({
-        destination: "/app/cartWS/completeCart",
-        body: JSON.stringify({
-          id: cart.id,
-          completeCartDto: updatePreSelected(id, newPreSelectedValue),
-        }),
-      });
-    } else {
-      Alert.alert("Connection Error", "WebSocket is not connected.");
+    if (newPreSelectedValue >= 0) {
+      if (client && isConnected) {
+        client.publish({
+          destination: "/app/cartWS/completeCart",
+          body: JSON.stringify({
+            id: cart.id,
+            completeCartDto: updatePreSelected(id, newPreSelectedValue),
+          }),
+        });
+      } else {
+        Alert.alert("Connection Error", "WebSocket is not connected.");
+      }
     }
   };
 
@@ -140,6 +144,19 @@ function Menu({ route }) {
       setError("Failed to load tables");
       setIsLoading(false);
     }
+  };
+
+  const getTotalToPayed = () => {
+    let totalToPay = 0;
+
+    // Check if localCart has cartItems array
+    if (cart.cartItems && cart.cartItems.length > 0) {
+      cart.cartItems.forEach((item) => {
+        totalToPay += item.payed * item.menuItem.price;
+      });
+    }
+
+    return totalToPay.toFixed(2); // Return total with two decimal places
   };
 
   // Group items by their menuItemType into sections
@@ -233,11 +250,21 @@ function Menu({ route }) {
             ListEmptyComponent={<Text>No items found</Text>}
           />
 
-          <Button
-            title={t("validateMenu")}
-            onPress={() => setIsModalVisible(true)}
-            color="#388e3c"
-          />
+          <View style={{ marginBottom: 4 }}>
+            <Button
+              title={t("checkAlreadyPayedItems")}
+              onPress={() => setiIsAlreadyPayedListVisible(true)}
+              color="#388e3c"
+            />
+          </View>
+
+          <View>
+            <Button
+              title={t("validateMenu")}
+              onPress={() => setIsModalVisible(true)}
+              color="#388e3c"
+            />
+          </View>
 
           <Modal
             visible={isModalVisible}
@@ -289,6 +316,61 @@ function Menu({ route }) {
                     onPress={() => setIsModalVisible(false)}
                   >
                     <Text style={styles.modalButtonText}>{t("cancel")}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+          <Modal
+            visible={isAlreadyPayedListVisible}
+            onRequestClose={() => setiIsAlreadyPayedListVisible(false)}
+            animationType="slide"
+            transparent={true}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Items Payed</Text>
+                <FlatList
+                  data={cart.cartItems.filter((i) => i.payed > 0)}
+                  renderItem={({ item }) => {
+                    return (
+                      <View style={styles.itemContainer}>
+                        <Text style={styles.itemText}>
+                          <Text style={styles.itemPayedText}>
+                            {" "}
+                            - {item.payed}{" "}
+                          </Text>
+                          <Text style={styles.itemMultiplicationSign}> x </Text>
+                          <Text style={styles.itemTitleText}>
+                            {t(item.menuItem.title)}
+                          </Text>
+                        </Text>
+                      </View>
+                    );
+                  }}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>No items selected</Text>
+                  }
+                  refreshing={refreshing}
+                />
+                <View style={styles.totalContainer}>
+                  <Text style={styles.totalLabelText}>
+                    Total Payed:{" "}
+                    <Text style={styles.totalAmountText}>
+                      {getTotalToPayed()} €
+                    </Text>
+                  </Text>
+                </View>
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.validateButton]}
+                    onPress={() => {
+                      setiIsAlreadyPayedListVisible(false);
+                    }}
+                  >
+                    <Text style={[styles.buttonText, { color: "white" }]}>
+                      Close
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -435,6 +517,28 @@ const styles = StyleSheet.create({
     color: "#666",
     fontWeight: "normal",
     marginHorizontal: 5,
+  },
+  totalContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: "#f7f7f7",
+    borderRadius: 10,
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+  },
+  totalLabelText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  totalAmountText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#4CAF50",
   },
 });
 
