@@ -31,7 +31,7 @@ function TablesList(props) {
   const fetchTables = async () => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/table/findAllOpenTables"
+        "http://10.50.104.71:8080/table/findAllOpenTables"
       );
       const data = await response.json();
       console.log(data);

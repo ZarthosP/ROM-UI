@@ -22,7 +22,7 @@ import "text-encoding-polyfill";
 const Stack = createNativeStackNavigator();
 
 function TablesListScreen({ navigation }) {
-  const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
+  const WEBSOCKET_URL = "http://10.50.104.71:8080/ws";
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +37,7 @@ function TablesListScreen({ navigation }) {
   const fetchTables = async () => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/table/findAllOpenTables"
+        "http://10.50.104.71:8080/table/findAllOpenTables"
       );
       const data = await response.json();
       setTableList(data);
@@ -51,7 +51,7 @@ function TablesListScreen({ navigation }) {
 
   const addTable = async () => {
     try {
-      const response = await fetch("http://192.168.1.43:8080/table/addTable", {
+      const response = await fetch("http://10.50.104.71:8080/table/addTable", {
         method: "post",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ function TablesListScreen({ navigation }) {
   const closeTable = async (id) => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/table/closeTable/" + id
+        "http://10.50.104.71:8080/table/closeTable/" + id
       );
       const data = await response.json();
       setTableList(data);
@@ -90,7 +90,7 @@ function TablesListScreen({ navigation }) {
   const removeNotification = async (table) => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/table/removeNotification",
+        "http://10.50.104.71:8080/table/removeNotification",
         {
           method: "post",
           headers: {
@@ -153,7 +153,7 @@ function TablesListScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Button title="Log table list" onPress={() => console.log(tableList)} />
+      {/* <Button title="Log table list" onPress={() => console.log(tableList)} /> */}
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>

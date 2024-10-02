@@ -9,10 +9,10 @@ function MenuItem({ title, quantity, price, confirmed, preSelected, ready }) {
       <Text style={styles.title}>
         {t(title)} - {price}€
       </Text>
-      <Text style={styles.subText}>Selected: {preSelected}</Text>
+      <Text style={styles.subText}>{t("selected")}: {preSelected}</Text>
       {confirmed + ready > 0 && (
         <Text style={styles.subTextRed}>
-          Already ordered: {confirmed + ready}
+          {t("alreadyOrdered")}: {confirmed + ready}
         </Text>
       )}
     </View>

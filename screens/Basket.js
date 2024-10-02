@@ -23,10 +23,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 
 function Menu({ route }) {
-  const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
+  const WEBSOCKET_URL = "http://10.50.104.71:8080/ws";
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [tableId, setTableId] = useState(route.params.tableId);
+  const [loggedUser, setLoggedUser] = useState({});
   const { t } = useTranslation();
 
   const [cart, setCart] = useState([]);
@@ -54,7 +55,20 @@ function Menu({ route }) {
 
   const [bundleName, setBundleName] = useState("");
 
+  const getLoggedUserData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("logged-user");
+      setLoggedUser(jsonValue != null ? JSON.parse(jsonValue) : null);
+    } catch (e) {
+      console.error("Error reading user data", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
+    getLoggedUserData();
+
     // Initialize the STOMP client
     const stompClient = new Client({
       webSocketFactory: () => new SockJS(WEBSOCKET_URL),
@@ -252,6 +266,21 @@ function Menu({ route }) {
     return totalToPay.toFixed(2); // Return total with two decimal places
   };
 
+  const getTotalToPayForBundleWithParam = ( item ) => {
+    let totalToPay = 0;
+
+    if (
+      item.prePaymentCartItems &&
+      item.prePaymentCartItems.length > 0
+    ) {
+      item.prePaymentCartItems.forEach((item) => {
+        totalToPay += item.quantity * item.menuItem.price;
+      });
+    }
+
+    return totalToPay.toFixed(2); // Return total with two decimal places
+  };
+
   const getTotalToPayed = () => {
     let totalToPay = 0;
 
@@ -287,7 +316,7 @@ function Menu({ route }) {
   const createBundle = async () => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/cart/createPaymentBundle",
+        "http://10.50.104.71:8080/cart/createPaymentBundle",
         {
           method: "post",
           headers: {
@@ -326,7 +355,7 @@ function Menu({ route }) {
   const findBundle = async () => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/cart/getAllPaymentBundleForTable/" + tableId
+        "http://10.50.104.71:8080/cart/getAllPaymentBundleForTable/" + tableId
       );
       const data = await response.json();
       console.log(data);
@@ -338,7 +367,7 @@ function Menu({ route }) {
   const validateSelectedBundle = async () => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/cart/validateBundle/" + selectedBundle.id
+        "http://10.50.104.71:8080/cart/validateBundle/" + selectedBundle.id
       );
       const data = await response.json();
       console.log(data);
@@ -349,7 +378,7 @@ function Menu({ route }) {
 
   return (
     <View style={styles.container}>
-      <Button
+      {/* <Button
         title="Log list"
         onPress={() =>
           console.log(localCart.cartItems.filter((i) => i.payed > 0).length > 0)
@@ -367,7 +396,7 @@ function Menu({ route }) {
       <Button
         title="Log localCart"
         onPress={() => console.log(localCart)}
-      ></Button>
+      ></Button> */}
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -376,7 +405,7 @@ function Menu({ route }) {
         <>
           <Text style={styles.titleText}>To pay</Text>
           <FlatList
-            data={localCart.cartItems.filter((i) => i.ready > 0 || i.payed > 0)}
+            data={localCart.cartItems?.filter((i) => i.ready > 0 || i.payed > 0) || []}
             renderItem={({ item }) => {
               return (
                 <View style={styles.itemContainer}>
@@ -407,20 +436,28 @@ function Menu({ route }) {
             refreshing={refreshing}
           />
 
-          <Button
-            title="Check Bundles"
-            onPress={() => setIsBundleModalVisible(true)}
-          />
+          <View style={{marginHorizontal: 5}}>
+            <Button
+              title={t("bundles")}
+              onPress={() => setIsBundleModalVisible(true)}
+            />
+          </View>
+          
 
-          <Button
-            title="Check Already Payed Items"
-            onPress={() => setiIsAlreadyPayedListVisible(true)}
-          />
-
-          <Button
-            title="Validate changes"
-            onPress={() => setIsModalVisible(true)}
-          />
+          <View style={styles.buttonContainer}>
+            <View style={styles.buttonWrapper}>
+              <Button
+                title={t("checkAlreadyPayedItems")}
+                onPress={() => setiIsAlreadyPayedListVisible(true)}
+              />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Button
+                title={t("validateItems")}
+                onPress={() => setIsModalVisible(true)}
+              />
+            </View>
+          </View>
           <Modal
             visible={isModalVisible}
             onRequestClose={() => setIsModalVisible(false)}
@@ -431,7 +468,7 @@ function Menu({ route }) {
               <View style={styles.modalContainer}>
                 <Text style={styles.modalTitle}>Items Selected</Text>
                 <FlatList
-                  data={localCart.cartItems.filter((i) => i.payed > 0)}
+                  data={cart.cartItems?.filter((i) => i.payed > 0) || []}
                   renderItem={({ item }) => {
                     return (
                       <View style={styles.itemContainer}>
@@ -538,7 +575,7 @@ function Menu({ route }) {
                   style={[styles.modalButton, styles.validateButton]}
                   onPress={() => setIsSuccessMessageVisible(false)}
                 >
-                  <Text style={styles.buttonText}>Close</Text>
+                  <Text style={styles.buttonText}>{t("close")}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -561,7 +598,7 @@ function Menu({ route }) {
                           <Text style={styles.itemText}>
                             <Text style={styles.itemPayedText}>
                               {" "}
-                              - {item.name}{" "}
+                              - {item.name}{" "}({getTotalToPayForBundleWithParam(item)}€)
                             </Text>
                           </Text>
                         </View>
@@ -574,14 +611,69 @@ function Menu({ route }) {
                   refreshing={refreshing}
                 />
                 <TouchableOpacity
-                  style={[styles.modalButton, styles.validateButton]}
+                  style={[styles.modalButton, styles.cancelButton]}
                   onPress={() => setIsBundleModalVisible(false)}
                 >
-                  <Text style={styles.buttonText}>Close</Text>
+                  <Text style={styles.buttonText}>{t("close")}</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </Modal>
+          <Modal
+            visible={isAlreadyPayedListVisible}
+            onRequestClose={() => setiIsAlreadyPayedListVisible(false)}
+            animationType="slide"
+            transparent={true}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Items Payed</Text>
+                <FlatList
+                  data={cart.cartItems?.filter((i) => i.payed > 0) || []}
+                  renderItem={({ item }) => {
+                    return (
+                      <View style={styles.itemContainer}>
+                        <Text style={styles.itemText}>
+                          <Text style={styles.itemPayedText}>
+                            {" "}
+                            - {item.payed}{" "}
+                          </Text>
+                          <Text style={styles.itemMultiplicationSign}> x </Text>
+                          <Text style={styles.itemTitleText}>
+                            {t(item.menuItem.title)}
+                          </Text>
+                        </Text>
+                      </View>
+                    );
+                  }}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>No items selected</Text>
+                  }
+                  refreshing={refreshing}
+                />
+                <View style={styles.totalContainer}>
+                  <Text style={styles.totalLabelText}>
+                    {t("totalPayed")}:{" "}
+                    <Text style={styles.totalAmountText}>
+                      {getTotalToPayed()} €
+                    </Text>
+                  </Text>
+                </View>
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => {
+                      setiIsAlreadyPayedListVisible(false);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>{t("close")}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+
+
           <Modal
             visible={isSelectedBundleModalVisible}
             onRequestClose={() => setIsSelectedBundleModalVisible(false)}
@@ -623,21 +715,24 @@ function Menu({ route }) {
                   </Text>
                 </View>
                 <View style={styles.modalButtons}>
+                  { loggedUser ? (
+                    <TouchableOpacity
+                      style={[styles.modalButton, styles.validateButton]}
+                      onPress={() => {
+                        validateSelectedBundle();
+                        setSelectedBundle({});
+                        setIsSelectedBundleModalVisible(false);
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Validate Payment</Text>
+                    </TouchableOpacity>
+                  ) : (<></>)}
+                    
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.validateButton]}
-                    onPress={() => {
-                      validateSelectedBundle();
-                      setSelectedBundle({});
-                      setIsSelectedBundleModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>Validate Payment</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.modalButton, styles.validateButton]}
+                    style={[styles.modalButton, styles.cancelButton]}
                     onPress={() => setIsSelectedBundleModalVisible(false)}
                   >
-                    <Text style={styles.buttonText}>Close</Text>
+                    <Text style={styles.buttonText}>{t("close")}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -805,6 +900,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+    width: "100%",
+  },
+  buttonWrapper: {
+    flex: 1,
+    marginHorizontal: 5,
   },
 });
 

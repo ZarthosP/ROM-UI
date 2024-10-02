@@ -13,7 +13,7 @@ import SockJS from "sockjs-client";
 import "text-encoding-polyfill";
 
 function Kitchen(props) {
-  const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
+  const WEBSOCKET_URL = "http://10.50.104.71:8080/ws";
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [cartList, setCartList] = useState([]);

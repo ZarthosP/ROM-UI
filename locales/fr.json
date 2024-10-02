@@ -22,5 +22,12 @@
     "noItemsSelected": "Pas de nouveaux items séléctionnés",
     "itemsSelected": "Nouveaux items séléctionnés",
     "validateItems": "Valider items",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "checkAlreadyPayedItems": "Déjà Payé",
+    "totalPayed": "Total payé",
+    "bundles": "Groupements",
+    "selected": "Sélécionné(s)",
+    "alreadyOrdered": "Déjà commandé(s)",
+    "beer": "Bière",
+    "wine": "Vin"
 }

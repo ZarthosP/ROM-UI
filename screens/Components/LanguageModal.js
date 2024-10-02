@@ -122,14 +122,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   openButton: {
-    backgroundColor: "#2196F3",
-    padding: 10,
-    borderRadius: 10,
+    marginRight: 10, // Add margin for header alignment
   },
   openButtonText: {
-    color: "white",
+    color: "#2196F3",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 14, // Reduce font size for better alignment in the header
   },
 });
 

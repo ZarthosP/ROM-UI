@@ -12,7 +12,7 @@ function OrderItem({ itemName, quantity, table, id }) {
   const fetchCart = async () => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/cart/cartItem/setReady/" + id
+        "http://10.50.104.71:8080/cart/cartItem/setReady/" + id
       );
       const data = await response.json();
       console.log(data);

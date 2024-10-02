@@ -18,7 +18,7 @@ import SockJS from "sockjs-client";
 import { useTranslation } from "react-i18next";
 
 function Menu({ route }) {
-  const WEBSOCKET_URL = "http://192.168.1.43:8080/ws";
+  const WEBSOCKET_URL = "http://10.50.104.71:8080/ws";
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [tableId, setTableId] = useState(route.params.tableId);
@@ -131,7 +131,7 @@ function Menu({ route }) {
   const addWaiterNotification = async () => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/table/callWaiter/" + tableId
+        "http://10.50.104.71:8080/table/callWaiter/" + tableId
       );
       const data = await response.json();
       setIsWaiterCalled(true);
@@ -146,13 +146,13 @@ function Menu({ route }) {
     }
   };
 
-  const getTotalToPayed = () => {
+  const getTotalOrdered = () => {
     let totalToPay = 0;
 
     // Check if localCart has cartItems array
     if (cart.cartItems && cart.cartItems.length > 0) {
       cart.cartItems.forEach((item) => {
-        totalToPay += item.payed * item.menuItem.price;
+        totalToPay += (item.payed + item.ready + item.confirmed) * item.menuItem.price;
       });
     }
 
@@ -201,11 +201,11 @@ function Menu({ route }) {
         onPress={addWaiterNotification}
         color="#f57c00"
       />
-      <Button
+      {/* <Button
         title="log cart"
         onPress={() => console.log(cart)}
         color="#f57c00"
-      />
+      /> */}
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -250,20 +250,21 @@ function Menu({ route }) {
             ListEmptyComponent={<Text>No items found</Text>}
           />
 
-          <View style={{ marginBottom: 4 }}>
-            <Button
-              title={t("checkAlreadyPayedItems")}
-              onPress={() => setiIsAlreadyPayedListVisible(true)}
-              color="#388e3c"
-            />
-          </View>
-
-          <View>
-            <Button
-              title={t("validateMenu")}
-              onPress={() => setIsModalVisible(true)}
-              color="#388e3c"
-            />
+          <View style={styles.buttonContainer}>
+            <View style={styles.buttonWrapper}>
+              <Button
+                title={t("alreadyOrdered")}
+                onPress={() => setiIsAlreadyPayedListVisible(true)}
+                color="#388e3c"
+              />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Button
+                title={t("validateMenu")}
+                onPress={() => setIsModalVisible(true)}
+                color="#388e3c"
+              />
+            </View>
           </View>
 
           <Modal
@@ -329,16 +330,16 @@ function Menu({ route }) {
           >
             <View style={styles.modalOverlay}>
               <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Items Payed</Text>
+                <Text style={styles.modalTitle}>Items Ordered</Text>
                 <FlatList
-                  data={cart.cartItems.filter((i) => i.payed > 0)}
+                  data={cart.cartItems.filter((i) => i.payed > 0 || i.confirmed > 0 || i.ready > 0 )}
                   renderItem={({ item }) => {
                     return (
                       <View style={styles.itemContainer}>
                         <Text style={styles.itemText}>
                           <Text style={styles.itemPayedText}>
                             {" "}
-                            - {item.payed}{" "}
+                            - {item.payed + item.confirmed + item.ready}{" "}
                           </Text>
                           <Text style={styles.itemMultiplicationSign}> x </Text>
                           <Text style={styles.itemTitleText}>
@@ -357,7 +358,7 @@ function Menu({ route }) {
                   <Text style={styles.totalLabelText}>
                     Total Payed:{" "}
                     <Text style={styles.totalAmountText}>
-                      {getTotalToPayed()} €
+                      {getTotalOrdered()} €
                     </Text>
                   </Text>
                 </View>
@@ -369,7 +370,7 @@ function Menu({ route }) {
                     }}
                   >
                     <Text style={[styles.buttonText, { color: "white" }]}>
-                      Close
+                      {t("close")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -539,6 +540,16 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#4CAF50",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+    width: "100%",
+  },
+  buttonWrapper: {
+    flex: 1,
+    marginHorizontal: 5,
   },
 });
 

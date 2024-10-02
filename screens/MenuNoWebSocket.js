@@ -35,7 +35,7 @@ function MenuNoWebSocket(props) {
   const fetchCart = async () => {
     try {
       const response = await fetch(
-        "http://192.168.1.43:8080/cart/getCompleteCart/" + 1
+        "http://10.50.104.71:8080/cart/getCompleteCart/" + 1
       );
       const data = await response.json();
       setCart(data.cartItems);
@@ -70,7 +70,7 @@ function MenuNoWebSocket(props) {
 
   return (
     <View style={styles.container}>
-      <Button title="Log cart" onPress={() => console.log(cart)}></Button>
+      {/* <Button title="Log cart" onPress={() => console.log(cart)}></Button> */}
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
