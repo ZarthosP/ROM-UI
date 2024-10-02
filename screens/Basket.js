@@ -468,7 +468,7 @@ function Menu({ route }) {
               <View style={styles.modalContainer}>
                 <Text style={styles.modalTitle}>Items Selected</Text>
                 <FlatList
-                  data={cart.cartItems?.filter((i) => i.payed > 0) || []}
+                  data={localCart.cartItems?.filter((i) => i.payed > 0) || []}
                   renderItem={({ item }) => {
                     return (
                       <View style={styles.itemContainer}>
@@ -498,6 +498,7 @@ function Menu({ route }) {
                     </Text>
                   </Text>
                 </View>
+                <Text style={styles.paimentOptionTitle}>{t("payYourself")}</Text>
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.validateButton]}
@@ -515,7 +516,7 @@ function Menu({ route }) {
                     {isCheckingPaymentVisible ? (
                       <ActivityIndicator />
                     ) : (
-                      <Text style={styles.buttonText}>Validate Payment</Text>
+                      <Text style={styles.buttonText}>{t("validatePayment")}</Text>
                     )}
                   </TouchableOpacity>
 
@@ -526,13 +527,14 @@ function Menu({ route }) {
                       setBundleName("");
                     }}
                   >
-                    <Text style={styles.buttonText}>Cancel</Text>
+                    <Text style={styles.buttonText}>{t("cancel")}</Text>
                   </TouchableOpacity>
                 </View>
+                <Text style={styles.paimentOptionTitle}>{t("payWithWaiter")}</Text>
                 <View style={styles.inputButtonContainer}>
                   <TextInput
                     style={[styles.input, styles.flexEqual]}
-                    placeholder="Reference"
+                    placeholder={t("name")}
                     value={bundleName}
                     onChangeText={setBundleName}
                   />
@@ -823,6 +825,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 20,
+  },
+  paimentOptionTitle: {
+    fontSize: 15,
+    fontWeight: "bold",
+    marginTop: 10,
+    marginBottom: -5,
+    textAlign: "center"
   },
   itemText: {
     fontSize: 18,

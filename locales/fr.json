@@ -4,6 +4,7 @@
     "vegetarianMenu":"Menu poisson",
 
     "coffee":"Coffee",
+    "name": "Votre Nom",
 
     "test":"test en Francais",
     "changeLanguage": "Changer de langue",
@@ -29,5 +30,8 @@
     "selected": "Sélécionné(s)",
     "alreadyOrdered": "Déjà commandé(s)",
     "beer": "Bière",
-    "wine": "Vin"
+    "wine": "Vin",
+    "payYourself": "Payez par vous-même",
+    "payWithWaiter": "ou séléctionnez ce que vous voulez payer, et attendez que le serveur vienne finir votre paiment",
+    "validatePayment": "Valider le paiment"
 }

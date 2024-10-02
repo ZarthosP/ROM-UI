@@ -16,3 +16,22 @@ Bien développée mais doit rajouter :
         visualisation de la commande qui se prépare à table (avant validation)
         visualisation claire de ce qui a été commandé et de ce qu’on veut rajouter sur la commande
 réfléchir à une prodédure de paiement qui doit être réaliste : le serveur doit voir ce qui a été payé (avec un mécanisme de preuve de paiement), le client doit pouvoir payer avec son tel ou mécanisme d’aide au paiement : écrans clairs permettant de visualiser ce que chacun va payer
+
+Changes:
+
+TableList:
+
+    - Added notifications
+
+MenuList:
+
+    - Separated list into Menus, Drinks, and Desserts
+    - Added validations/constraints
+    - Added button to call waiter
+    - Added button to check what's already been ordered
+    - Added modal to see summary of what's about to be added
+
+Basket:
+
+    - Added Bundle feature
+    - Added button to check what has already been payed

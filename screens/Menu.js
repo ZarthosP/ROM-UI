@@ -16,9 +16,11 @@ import MenuItem from "./Components/MenuItem";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useTranslation } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function Menu({ route }) {
   const WEBSOCKET_URL = "http://10.50.104.71:8080/ws";
+  const [loggedUser, setLoggedUser] = useState({});
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [tableId, setTableId] = useState(route.params.tableId);
@@ -32,6 +34,17 @@ function Menu({ route }) {
     useState(false);
 
   const { t } = useTranslation();
+  
+  const getLoggedUserData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("logged-user");
+      setLoggedUser(jsonValue != null ? JSON.parse(jsonValue) : null);
+    } catch (e) {
+      console.error("Error reading user data", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Initialize the STOMP client
@@ -69,6 +82,7 @@ function Menu({ route }) {
     return () => {
       stompClient.deactivate();
     };
+    getLoggedUserData();
   }, []);
 
   const changeItemQuantity = (id, newPreSelectedValue) => {
@@ -195,6 +209,7 @@ function Menu({ route }) {
   }
 
   return (
+    
     <View style={styles.container}>
       <Button
         title={isWaiterCalled ? t("waiterOnHisWay") : t("callWaiter")}
